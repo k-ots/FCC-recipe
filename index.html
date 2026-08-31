@@ -1440,7 +1440,9 @@ File/folder source
       <li><div class="tr-row"><span class="tr-n">3</span><span class="tr-k k-if">IF</span><span>Event = FILE.UPLOADED　<span class="ph ph-now">フェーズ1</span></span></div>
         <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>新規アップロード／バージョン追加</span></div></li></ul>
       </li>
-      <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = FOLDER.CREATED　<span class="ph ph-todo">フェーズ3</span></span></div></li>
+      <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = FOLDER.CREATED　<span class="ph ph-now">フェーズ3</span></span></div>
+        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>フォルダ作成（詳細は <a href="#sync:y5">05</a>）</span></div></li></ul>
+      </li>
       <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.RENAMED　<span class="ph ph-todo">フェーズ4</span></span></div></li>
       <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.MOVED　<span class="ph ph-todo">フェーズ5</span></span></div></li>
       <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.TRASHED / *.RESTORED　<span class="ph ph-todo">フェーズ6</span></span></div></li>
@@ -1463,7 +1465,7 @@ File/folder source
     <tr><th>#</th><th>対象</th><th>内容</th><th>状態</th></tr>
     <tr><td class="nowrap">1</td><td class="nowrap">FILE.UPLOADED<br><span class="empty">新規のみ</span></td><td>未登録のファイルを新規アップロードし、対応表に登録する。移行レシピとほぼ同じ部品</td><td><span class="ph ph-now">実装中</span></td></tr>
     <tr><td class="nowrap">2</td><td class="nowrap">FILE.UPLOADED<br><span class="empty">更新</span></td><td>登録済みファイルに新バージョンを追加する。<b>実装方式が未確定</b>（<a href="#sync:y6">06</a>）</td><td><span class="ph ph-todo">未着手</span></td></tr>
-    <tr><td class="nowrap">3</td><td class="nowrap">FOLDER.CREATED</td><td>親を解決してフォルダを作成し、対応表に登録する</td><td><span class="ph ph-todo">未着手</span></td></tr>
+    <tr><td class="nowrap">3</td><td class="nowrap">FOLDER.CREATED</td><td>親を解決してフォルダを作成し、対応表に登録する。単体の空フォルダ作成では動作確認済み。<b>入れ子のフォルダ・ファイルを含むフォルダの一括アップロードは未検証</b>（<a href="#sync:y6">06</a>）</td><td><span class="ph ph-now">実装中</span></td></tr>
     <tr><td class="nowrap">4</td><td class="nowrap">*.RENAMED</td><td>Forma 側を改名する。フォルダから先に着手すると容易</td><td><span class="ph ph-todo">未着手</span></td></tr>
     <tr><td class="nowrap">5</td><td class="nowrap">*.MOVED</td><td>Forma 側の親フォルダを変更する</td><td><span class="ph ph-todo">未着手</span></td></tr>
     <tr><td class="nowrap">6</td><td class="nowrap">*.TRASHED<br>*.RESTORED</td><td>削除と復元。影響範囲が大きいため最後に実装する</td><td><span class="ph ph-todo">未着手</span></td></tr>
@@ -1570,6 +1572,7 @@ File/folder source
           <li><b>Box 側が同一アップロードに対し 2 回 API 呼び出しを行っている</b> … その場合は Box 側のイベントも 2 回発行され、ジョブが 2 件に分かれるはずだが、ジョブ履歴には常に 1 件しか記録されないため、除外</li>
         </ul>
         <p style="margin-top:8px">唯一残った仮説は<b>「Workato の通信処理内部で、最初のリクエストの成功応答を受け取れず、自動的に同一リクエストを再送している」</b>というもの（Workato/Autodesk 側の内部実装に起因し、UI 上の情報だけでは確定できない）。デバッグタブのネットワークトレースにも、これを裏付ける・否定する決め手は見つからなかった。<b>根本原因は未解明のまま。</b>確定させるには Workato サポートへの問い合わせが必要（ジョブID 例：<code>j-AbPhMfpE-W8K8oH-CD</code>）。</p>
+        <p style="margin-top:8px"><b>【追記】</b>フェーズ3（<code>Create folder in a project</code>）でも、まったく同じ 409 の重複現象が確認された（<a href="#sync:y5">05 フェーズ3の構成</a>）。<code>Upload object</code> と <code>Create folder</code> は実装もコネクタも異なるアクションであり、<b>異なる 2 つのアクションで同じ現象が起きたことから、原因は特定のアクション内部の再送処理ではなく、トリガー／ジョブ実行の起点側にある可能性が高まった。</b>いずれにせよ、このエラー監視パターンは<b>継続同期レシピの全アクション（Upload・Create folder・今後実装する更新／リネーム／移動系のアクション）に共通で適用すべき</b>という結論に至っている。</p>
       </div>
       </div>
     </div>
@@ -1634,6 +1637,112 @@ File/folder source
     <span class="h">簡略化の余地</span>
     <p>ステップ 5・6 は、<code>Lookup entry</code>（単一取得）が使えれば 1 ステップに減らせる可能性がある。ただし該当なしのときの挙動が未確認のため、まずは確実に動く繰り返し方式で構築する。</p>
   </div>
+
+  <h3>フェーズ3 の構成</h3>
+  <p><b>FOLDER.CREATED（フォルダ作成）</b>。ステップ3（Event = FILE.UPLOADED）の「いいえ」の枝に、ELSE IF として追加する。共通のステップ2（登録済み判定）を再利用するため、フェーズ1より少ないステップ数で組める。</p>
+
+  <div class="steps">
+
+    <div class="step" data-d="1">
+      <div class="step-h"><span class="step-n">13</span><span class="step-t">ELSE IF 条件を設定する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>データフィールド</dt><dd><span class="pill">Event ステップ1</span></dd>
+        <dt>条件</dt><dd>に等しいなら</dd>
+        <dt>値</dt><dd><code>FOLDER.CREATED</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="2">
+      <div class="step-h"><span class="step-n">14</span><span class="step-t">IF 条件を設定する</span><span class="step-app">ロジック</span><span class="step-br">13 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>データフィールド</dt><dd><span class="pill">List size ステップ2</span>　<span class="empty">共通のステップ2を再利用。フェーズ1と違い Size の条件は付けない（フォルダの Size は配下合計のため、0バイト除外の対象外）</span></dd>
+        <dt>条件</dt><dd>に等しいなら</dd>
+        <dt>値</dt><dd><code>0</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="3">
+      <div class="step-h"><span class="step-n">15</span><span class="step-t">エントリーを検索</span><span class="step-app">Lookup table・複数取得</span><span class="step-br">14 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>Lookup table</dt><dd>案件の対応表</dd>
+        <dt>Search by → box_id</dt><dd><span class="pill">File/folder source &gt; Parent &gt; ID ステップ1</span></dd>
+        <dt>目的</dt><dd>投入先（親）フォルダの Forma URN を取得する</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="3">
+      <div class="step-h"><span class="step-n">16</span><span class="step-t">各アイテムに対して繰り返す</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>リストを入力</dt><dd><span class="pill">Entries ステップ15</span></dd>
+        <dt>役割</dt><dd>フェーズ1のステップ5・6と同じ理由。<b>親フォルダが対応表に無い場合は 0 周となり、何もせず終了する</b>（安全弁）</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">17</span><span class="step-t">監視：以下のアクションをエラー監視する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>監視対象</dt><dd>ステップ 18（Create folder）</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">18</span><span class="step-t">Create folder in a project</span><span class="step-app">Autodesk Forma</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>Object</dt><dd><code>Folder</code></dd>
+        <dt>Account name / Project name</dt><dd>案件の値</dd>
+        <dt>Parent folder ID</dt><dd>モード：<code>Enter parent folder ID</code>　値：ステップ16ループ中の <span class="pill">forma_id</span></dd>
+        <dt>Name</dt><dd><span class="pill">File/folder source &gt; Name ステップ1</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="divider">エラーを検知したら（はい）</div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">19</span><span class="step-t">再試行しない</span><span class="step-app">監視ブロック設定</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>監視ブロック内のアクションをリトライしますか</dt><dd><code>リトライしない</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">20</span><span class="step-t">ジョブの停止</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>ジョブレポートで、停止したジョブを次のようにマーク</dt><dd><code>成功</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">21</span><span class="step-t">エントリーを追加</span><span class="step-app">Lookup table</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>box_id</dt><dd><span class="pill">File/folder source &gt; ID ステップ1</span></dd>
+        <dt>type</dt><dd><code>folder</code></dd>
+        <dt>forma_id</dt><dd><span class="pill">Folder ID ステップ18</span></dd>
+        <dt>forma_parent_id</dt><dd>ステップ16ループ中の <span class="pill">forma_id</span></dd>
+        <dt>last_name</dt><dd><span class="pill">File/folder source &gt; Name ステップ1</span></dd>
+        <dt>status</dt><dd><code>done</code>　<span class="empty">一括移行の <code>to_scan</code> とは異なる。理由は下記</span></dd>
+        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now.in_time_zone("Asia/Tokyo")</span></dd>
+      </dl></div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <span class="h"><code>status</code> を <code>to_scan</code> にしない理由</span>
+    <p>一括移行レシピでは、新規フォルダを <code>to_scan</code> にして「配下を後でスキャンする」キューとして扱っていた。継続同期にはスキャン処理そのものが存在せず、配下にファイルが追加されればそのファイル自身が個別にイベントを発火して同期されるため、フォルダ側で「後で中身を見る」という予約をする必要がない。よって継続同期では常に <code>done</code> を使う。</p>
+  </div>
+
+  <div class="note danger">
+    <span class="h">未検証：入れ子のフォルダ・ファイルを含むフォルダの一括アップロード</span>
+    <p>単体の空フォルダ作成では動作確認済み。しかし<b>「フォルダの中にサブフォルダがある」「フォルダの中にファイルがある」状態のフォルダを丸ごとアップロードした場合は未検証</b>。この場合、親フォルダの <code>FOLDER.CREATED</code> と、配下のサブフォルダ／ファイルのイベントが短時間で連続して発生する。もし親フォルダの対応表登録が完了する前に配下のイベントが処理されると、ステップ 5〜6（フェーズ1）・ステップ 15〜16（フェーズ3）の安全弁が働き、<b>配下のアイテムが対応表に見つからず、エラーにもならず静かにスキップされる</b>（同期漏れ）。詳細は <a href="#sync:y6">06 未確定事項</a>。</p>
+  </div>
+
+  <h3>フェーズ3 動作確認</h3>
+  <ol>
+    <li>トリガーで <code>Folder created</code> を有効にする</li>
+    <li>Box の同期対象フォルダに<b>空のフォルダを 1 つ</b>作成する</li>
+    <li>Forma 側に同じ名前のフォルダが作成されているか確認する</li>
+    <li>対応表に <code>type = folder</code> の行が 1 行増え、<code>status = done</code>、<code>last_synced_at</code> が <code>+09:00</code> になっているか確認する</li>
+  </ol>
 </section>
 
 <!-- ========== 06 ========== -->
@@ -1642,6 +1751,12 @@ File/folder source
 
   <div class="tw"><table>
     <tr><th>#</th><th>項目</th><th>影響</th><th>確認方法</th></tr>
+    <tr>
+      <td class="nowrap"><span class="ph ph-open">重要</span></td>
+      <td><b>入れ子のフォルダ・ファイルを含むフォルダを丸ごとアップロードしたときの同期漏れ</b></td>
+      <td>親フォルダの登録が完了する前に配下のイベントが処理されると、安全弁（0周ループ）が働いて<b>配下のアイテムがエラーも出さず静かにスキップされる</b>可能性がある（<a href="#sync:y5">05 フェーズ3の構成</a>）。フェーズ3実装により実機で検証可能になった</td>
+      <td>Boxで「サブフォルダを含むフォルダ」「ファイルを含むフォルダ」をそれぞれアップロードし、対応表・Forma側の両方でBox側の構成と過不足なく一致しているか確認する</td>
+    </tr>
     <tr>
       <td class="nowrap"><span class="ph ph-open">重要</span></td>
       <td><b><code>Upload object</code> の「File name」欄で既存 item にバージョン追加ができるか</b></td>
