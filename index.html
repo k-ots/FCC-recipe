@@ -1,3 +1,4 @@
+
 <title>Box→Forma 連携レシピ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -413,7 +414,9 @@ footer{
   <div class="side-label">Box→Forma 連携レシピ</div>
 
   <a class="tree-cover" href="#cover" data-nav>概要</a>
-<div class="tree-group">
+  <a class="tree-cover" href="#config" data-nav>⚙️ 案件設定</a>
+
+  <div class="tree-group">
     <a class="tree-recipe" href="#mig" data-nav>
       <span class="chev">▾</span>
       <span class="tree-recipe-name">一括移行レシピ</span>
@@ -427,7 +430,7 @@ footer{
       <a class="tree-item" href="#mig:s5" data-nav><span class="n">05</span><span>ステップ別 設定内容</span></a>
       <a class="tree-item" href="#mig:s6" data-nav><span class="n">06</span><span>エラー条件</span></a>
       <a class="tree-item" href="#mig:s7" data-nav><span class="n">07</span><span>運用手順</span></a>
-      <a class="tree-item" href="#mig:s8" data-nav><span class="n">08</span><span>対象プロジェクトの変更設定</span></a>
+      <a class="tree-item" href="#mig:s8" data-nav><span class="n">08</span><span>テンプレートとしての流用</span></a>
       <a class="tree-item" href="#mig:s9" data-nav><span class="n">09</span><span>既知の制限事項</span></a>
     </div>
   </div>
@@ -486,6 +489,91 @@ footer{
       <div class="recipe-card-meta">対象イベント 10 種　|　全 6 章</div>
     </a>
   </div>
+
+  <a class="config-callout" href="#config" data-nav>
+    <span class="config-callout-icon">⚙️</span>
+    <span class="config-callout-body">
+      <span class="config-callout-title">新しい案件で使うときは</span>
+      <span class="config-callout-sub">案件ごとに差し替える値をこのページ 1 か所にまとめてあります</span>
+    </span>
+    <span class="config-callout-arrow">→</span>
+  </a>
+</div>
+
+<!-- =================================================================== -->
+<!-- CONFIG — 案件ごとに差し替える値                                      -->
+<!-- =================================================================== -->
+<div class="panel" data-panel id="config">
+  <div class="part-band">
+    <div class="part-eyebrow">Project Config</div>
+    <div class="part-title">案件設定</div>
+    <p class="part-sub">新しい案件でこのレシピ一式を使うときに、差し替えが必要な値をまとめた一覧。ここだけ見れば、各レシピの中身を頭から追わなくても何を用意すればよいか分かる。</p>
+  </div>
+
+  <div class="note warn">
+    <span class="h">この一覧はチェックリストです</span>
+    <p>ここに書かれている値は、あくまで現在の案件（<code>202303_kondo_sample</code>）で使われている値の一覧。<b>この表の値を書き換えても、レシピ本体には反映されない。</b>実際の変更は、右の「使用箇所」欄に書かれたステップを 1 つずつ開いて直接編集すること。</p>
+  </div>
+
+  <h3>差し替える値</h3>
+  <div class="tw"><table>
+    <tr><th>設定項目</th><th>現在の値（202303_kondo_sample）</th><th>一括移行レシピでの使用箇所</th><th>継続同期レシピでの使用箇所</th></tr>
+    <tr>
+      <td class="nowrap">Box ルートフォルダ ID</td>
+      <td class="lit">412060984435</td>
+      <td><a href="#mig:s5">ステップ 2, 4</a></td>
+      <td>トリガーの <code>Folder</code> 設定</td>
+    </tr>
+    <tr>
+      <td class="nowrap">Box ルートフォルダ名称</td>
+      <td class="lit">Forma同期フォルダ</td>
+      <td><a href="#mig:s5">ステップ 4</a>（<code>last_name</code>）</td>
+      <td class="empty">—</td>
+    </tr>
+    <tr>
+      <td class="nowrap">Forma ルートフォルダ URN</td>
+      <td class="lit">urn:adsk.wipprod:fs.folder:co.gL6rNIfLQpSaXUBhalaGQA</td>
+      <td><a href="#mig:s5">ステップ 4</a>（<code>forma_id</code>）</td>
+      <td class="empty">— <span class="empty">（トリガーの Parent から自動解決するため直接指定は不要）</span></td>
+    </tr>
+    <tr>
+      <td class="nowrap">Forma Account name</td>
+      <td class="lit">Build</td>
+      <td><a href="#mig:s5">ステップ 15, 21</a></td>
+      <td><a href="#sync:y5">ステップ 8</a></td>
+    </tr>
+    <tr>
+      <td class="nowrap">Forma Project name</td>
+      <td class="lit">202303_kondo_sample</td>
+      <td><a href="#mig:s5">ステップ 15, 21</a></td>
+      <td><a href="#sync:y5">ステップ 8</a></td>
+    </tr>
+    <tr>
+      <td class="nowrap">対応表（Lookup table）名</td>
+      <td class="lit">kondo_Box_Forma_Mapping</td>
+      <td><a href="#mig:s5">ステップ 2, 4, 6, 13, 16, 18, 22, 23</a>（8 箇所）</td>
+      <td><a href="#sync:y5">ステップ 2, 5, 9</a>（フェーズ1 時点）</td>
+    </tr>
+  </table></div>
+
+  <div class="note">
+    <span class="h">対応表は案件ごとに新規作成する</span>
+    <p>上記の対応表名は今の案件のものであり、新しい案件では専用のテーブルを新規作成する。命名規則と作成手順は<a href="#mig:s8">一括移行レシピ 08 テンプレートとしての流用</a>を参照。</p>
+  </div>
+
+  <div class="note warn">
+    <span class="h">継続同期レシピはフェーズ1のみ反映</span>
+    <p>継続同期レシピは現在フェーズ1（新規ファイルのアップロード）までしか実装していない。フェーズ2 以降を実装すると、対応表や Forma Account / Project name を参照するステップがさらに増える。実装が進み次第この一覧も更新すること。</p>
+  </div>
+
+  <h3>新しい案件での作業手順</h3>
+  <ol>
+    <li>上表の 6 項目を、新しい案件の値に置き換えて手元に控える</li>
+    <li>両レシピを複製し、案件名が分かる名称に変更する</li>
+    <li>その案件用の対応表を新規作成する</li>
+    <li>上表の「使用箇所」列のステップを開き、値を 1 つずつ差し替える</li>
+    <li>各レシピの実行前チェックに従って動作確認する（<a href="#mig:s7">一括移行 07 運用手順</a>）</li>
+  </ol>
 </div>
 
 <!-- =================================================================== -->
@@ -510,7 +598,7 @@ footer{
     <a href="#mig:s5" data-nav><span class="n">05</span>ステップ別 設定内容</a>
     <a href="#mig:s6" data-nav><span class="n">06</span>エラー条件</a>
     <a href="#mig:s7" data-nav><span class="n">07</span>運用手順</a>
-    <a href="#mig:s8" data-nav><span class="n">08</span>対象プロジェクトの変更設定</a>
+    <a href="#mig:s8" data-nav><span class="n">08</span>テンプレートとしての流用</a>
     <a href="#mig:s9" data-nav><span class="n">09</span>既知の制限事項</a>
   </div>
 
@@ -527,7 +615,7 @@ footer{
   <div class="tw"><table>
     <tr><th>観点</th><th>扱い</th></tr>
     <tr><td class="nowrap">1 案件あたりの実行</td><td><b>1 回のみ。</b>移行完了後はレシピを停止したまま保管する</td></tr>
-    <tr><td class="nowrap">案件をまたいだ利用</td><td><b>テンプレートとして複数案件で流用する。</b>案件ごとにレシピを複製し、設定値を差し替えて使用する（<a href="#mig:s8">08 対象プロジェクトの変更設定</a>参照）</td></tr>
+    <tr><td class="nowrap">案件をまたいだ利用</td><td><b>テンプレートとして複数案件で流用する。</b>案件ごとにレシピを複製し、設定値を差し替えて使用する（<a href="#mig:s8">08 テンプレートとしての流用</a>参照）</td></tr>
     <tr><td class="nowrap">処理ロジック</td><td>案件によらず共通。差し替えるのは接続先を指す値のみで、ステップ構成の変更は不要</td></tr>
   </table></div>
 
@@ -569,7 +657,7 @@ footer{
 
   <div class="note">
     <span class="h">ID・URN・プロジェクト名は案件ごとに異なる</span>
-    <p>上表の <code>412060984435</code> 以下の値は <code>202303_kondo_sample</code> 案件のものである。他案件で流用する際に差し替える箇所は <a href="#mig:s8">08 対象プロジェクトの変更設定</a> に一覧化している。</p>
+    <p>上表の <code>412060984435</code> 以下の値は <code>202303_kondo_sample</code> 案件のものである。他案件で流用する際に差し替える箇所は <a href="#mig:s8">08 テンプレートとしての流用</a> に一覧化している。</p>
   </div>
 
   <div class="note warn">
@@ -586,7 +674,7 @@ footer{
 
   <div class="note">
     <span class="h">対応表は案件ごとに新規作成する</span>
-    <p>上記は <code>202303_kondo_sample</code> 案件用のテーブル名である。他案件では専用のテーブルを作成し、レシピ内 8 箇所のテーブル指定を差し替える。列定義は全案件で共通（下表のとおり）。詳細は <a href="#mig:s8">08 対象プロジェクトの変更設定</a>。</p>
+    <p>上記は <code>202303_kondo_sample</code> 案件用のテーブル名である。他案件では専用のテーブルを作成し、レシピ内 8 箇所のテーブル指定を差し替える。列定義は全案件で共通（下表のとおり）。詳細は <a href="#mig:s8">08 テンプレートとしての流用</a>。</p>
   </div>
 
   <div class="tw"><table>
@@ -711,7 +799,7 @@ footer{
     <span><code>等幅</code>　直接入力する固定値</span>
   </div>
 
-  <p>記載のない項目はすべて空欄。インデントは実際の入れ子の深さに対応する。<b>案件ごとに差し替えが必要な設定値は行を色付けし「要変更」を付している</b>（該当ステップは見出しに「要変更あり」を表示）。全 24 ステップ中 <b>10 ステップ・16 箇所</b>が対象。一覧は <a href="#mig:s8">08 対象プロジェクトの変更設定</a> にまとめている。</p>
+  <p>記載のない項目はすべて空欄。インデントは実際の入れ子の深さに対応する。<b>案件ごとに差し替えが必要な設定値は行を色付けし「要変更」を付している</b>（該当ステップは見出しに「要変更あり」を表示）。全 24 ステップ中 <b>10 ステップ・16 箇所</b>が対象。一覧は <a href="#mig:s8">08 テンプレートとしての流用</a> にまとめている。</p>
 
   <div class="steps">
 
@@ -731,8 +819,8 @@ footer{
         <dt>その他の列</dt><dd class="empty">すべて空欄</dd>
       </dl>
       <div class="note" style="margin:10px 0 0">
-        <span class="h">アクションの選定について</span>
-        <p><code>box_id</code> は一意キーであり、返る行は 0 件か 1 件のいずれかしかない。この用途には<b>単一取得の「エントリー検索」が適する</b>。複数取得版「エントリーを検索する」を使っている実務上の理由は特になく、レシピ構築時に最初に配置したアクションをそのまま使った結果である。動作・結果に問題は生じないが、新規に組む場合は単一取得を選ぶべき箇所。</p>
+        <span class="h">複数取得を使う理由（検証済み）</span>
+        <p><code>box_id</code> は一意キーなので、一見すると単一取得の「エントリー検索」でも良さそうに見える。<b>しかし実際に検証したところ、単一取得は該当なしの場合にエラーでジョブが停止し</b>（<code>Unable to find an entry matching search parameters</code>）、それを抑制する「Ignore if not found」のような設定項目も存在しないことを確認済み。この用途では「見つからない」＝新規ファイル・フォルダの初回検出であり、<b>むしろ通常発生するケース</b>のため、単一取得は使えない。複数取得は該当なしのとき空リスト（<code>Entries: []</code>）を正常に返すため、意図的にこちらを採用している。</p>
       </div>
       </div>
     </div>
@@ -774,12 +862,7 @@ footer{
         <dt>Search by → type</dt><dd><code>folder</code></dd>
         <dt>Search by → status</dt><dd><code>to_scan</code></dd>
         <dt>その他の列</dt><dd class="empty">すべて空欄</dd>
-      </dl>
-      <div class="note ok" style="margin:10px 0 0">
-        <span class="h">アクションの選定について</span>
-        <p>この検索は <code>type = folder</code> かつ <code>status = to_scan</code> に合致する行を<b>複数件（走査待ちのキュー）まとめて</b>取り出すためのもの。1 件しか返せない単一取得ではそもそも成立せず、<b>複数取得版が本来の用途に合致する</b>唯一の箇所。</p>
-      </div>
-      </div>
+      </dl></div>
     </div>
 
     <div class="step" data-d="2">
@@ -843,8 +926,7 @@ footer{
         <dt>その他の列</dt><dd class="empty">すべて空欄</dd>
       </dl>
       <div class="note" style="margin:10px 0 0">
-        <span class="h">アクションの選定について</span>
-        <p><code>box_id</code> による一意検索のため、ステップ 2 と同じく<b>単一取得が適する</b>。複数取得版を使っている理由は、ステップ 2 と同様に構築時の経緯によるもので、これといった実務上のメリットはない。</p>
+        <p>複数取得を使う理由はステップ 2 と同じ（単一取得は該当なしでエラーになることを検証済みのため、意図的に複数取得を採用）。</p>
       </div>
       </div>
     </div>
@@ -902,8 +984,7 @@ footer{
         <dt>その他の列</dt><dd class="empty">すべて空欄</dd>
       </dl>
       <div class="note" style="margin:10px 0 0">
-        <span class="h">アクションの選定について</span>
-        <p><code>box_id</code> による一意検索のため、ステップ 2 と同じく<b>単一取得が適する</b>。複数取得版を使っている理由は、ステップ 2 と同様に構築時の経緯によるもので、これといった実務上のメリットはない。</p>
+        <p>複数取得を使う理由はステップ 2 と同じ（単一取得は該当なしでエラーになることを検証済みのため、意図的に複数取得を採用）。</p>
       </div>
       </div>
     </div>
@@ -1049,7 +1130,7 @@ footer{
   <div class="note warn">
     <span class="h">レシピを起動状態にしないこと</span>
     <p>本レシピは 5 分間隔の Scheduler トリガーを持つ。保存後に「起動」すると<b>5 分ごとに移行処理が繰り返される</b>。必ずテストボタンからのみ実行すること。</p>
-    <p style="margin-top:8px">移行完了後はレシピを停止したまま保管し、<b>次の案件では複製して設定値を差し替えて使用する</b>（<a href="#mig:s8">08 対象プロジェクトの変更設定</a>）。完成済みのレシピを直接書き換えると、テンプレートとして参照できる状態が失われる。</p>
+    <p style="margin-top:8px">移行完了後はレシピを停止したまま保管し、<b>次の案件では複製して設定値を差し替えて使用する</b>（<a href="#mig:s8">08 テンプレートとしての流用</a>）。完成済みのレシピを直接書き換えると、テンプレートとして参照できる状態が失われる。</p>
   </div>
 
   <h3>実行後の確認</h3>
@@ -1072,19 +1153,9 @@ footer{
 
 <!-- ===================== 08 ===================== -->
 <section id="mig:s8">
-  <h2><span class="num">08</span>対象プロジェクトの変更設定</h2>
+  <h2><span class="num">08</span>テンプレートとしての流用</h2>
+
   <p>新しい案件で本レシピを使う場合は、<b>レシピを複製したうえで下表の値のみを差し替える</b>。ステップの追加・削除や入れ子構造の変更は不要である。</p>
-  <h3>変更前に確認する現在の設定値</h3>
-  <p>以下は現在の案件（<code>202303_kondo_sample</code>）で使用している値。新しい案件では、続く「案件ごとに差し替える設定値」に従って各ステップを直接変更する。この表を書き換えてもレシピ本体には反映されない。</p>
-  <div class="tw"><table>
-    <tr><th>設定項目</th><th>現在の値（202303_kondo_sample）</th></tr>
-    <tr><td class="nowrap">Box ルートフォルダ ID</td><td class="lit">412060984435</td></tr>
-    <tr><td class="nowrap">Box ルートフォルダ名称</td><td class="lit">Forma同期フォルダ</td></tr>
-    <tr><td class="nowrap">Forma ルートフォルダ URN</td><td class="lit">urn:adsk.wipprod:fs.folder:co.gL6rNIfLQpSaXUBhalaGQA</td></tr>
-    <tr><td class="nowrap">Forma Account name</td><td class="lit">Build</td></tr>
-    <tr><td class="nowrap">Forma Project name</td><td class="lit">202303_kondo_sample</td></tr>
-    <tr><td class="nowrap">対応表（Lookup table）名</td><td class="lit">kondo_Box_Forma_Mapping</td></tr>
-  </table></div>
 
   <h3>案件ごとに差し替える設定値</h3>
   <p>対象は <b>10 ステップ・16 箇所</b>。<a href="#mig:s5">05 ステップ別 設定内容</a>では該当行を色付けし <span class="chg-tag" style="margin-left:0">要変更</span> を付しているので、実際の設定作業はそちらを上から追えばよい。</p>
@@ -1429,8 +1500,8 @@ File/folder source
         <dt>目的</dt><dd>対象が既に登録済みか（＝新規か更新か）を判定する</dd>
       </dl>
       <div class="note" style="margin:10px 0 0">
-        <span class="h">アクションの選定について</span>
-        <p><code>box_id</code> は一意キーであり、返る行は 0 件か 1 件のいずれかしかない。この用途には本来<b>単一取得の「エントリー検索」が適する</b>。複数取得版でも <code>List size = 0</code> で同じ判定ができるため結果は変わらないが、単一取得を採用する場合は「該当なし」時の挙動（空を返すかエラーになるか）を先に単発検証してから切り替えること。</p>
+        <span class="h">複数取得を使う理由（検証済み）</span>
+        <p><code>box_id</code> は一意キーだが、単一取得の「エントリー検索」は該当なしの場合にエラーでジョブが停止することを一括移行レシピの検証で確認済み（<code>Ignore if not found</code> のような抑制設定も無い）。この用途では「見つからない」＝新規ファイルの初回検出であり<b>むしろ通常発生するケース</b>のため、単一取得は使えない。空リストを正常に返す複数取得を意図的に使用している。</p>
       </div>
       </div>
     </div>
@@ -1462,8 +1533,7 @@ File/folder source
         <dt>目的</dt><dd>投入先フォルダの Forma URN を取得する</dd>
       </dl>
       <div class="note" style="margin:10px 0 0">
-        <span class="h">アクションの選定について</span>
-        <p>親フォルダの <code>box_id</code> による一意検索であり、ステップ 2 と同様に本来は<b>単一取得が適する</b>。単一取得に切り替えれば、後段の「各アイテムに対して繰り返す」（ステップ 6）による 1 周ループを介さず <code>forma_id</code> を直接データピルとして受け取れる。</p>
+        <p>複数取得を使う理由はステップ 2 と同じ（単一取得は該当なしでエラーになることを検証済みのため、意図的に複数取得を採用）。ここでは万一親フォルダが対応表に無かった場合でもエラーにならず空リストが返るため、ステップ 6 が 0 周で安全に終了できる。</p>
       </div>
       </div>
     </div>
