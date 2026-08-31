@@ -1479,7 +1479,7 @@ File/folder source
 <section id="sync:y5">
   <h2><span class="num">05</span>フェーズ1 の構成</h2>
 
-  <p><b>FILE.UPLOADED（新規アップロード）</b>の 8 ステップ。データピルは <span class="pill">項目名 ステップN</span>、直接入力値は <code>等幅</code> で示す。インデントは入れ子の深さに対応する。</p>
+  <p><b>FILE.UPLOADED（新規アップロード）</b>の 12 ステップ（重複実行への対策として、ステップ8〜11 のエラー監視ブロックを含む）。データピルは <span class="pill">項目名 ステップN</span>、直接入力値は <code>等幅</code> で示す。インデントは入れ子の深さに対応する。</p>
 
   <div class="steps">
 
@@ -1557,7 +1557,25 @@ File/folder source
     </div>
 
     <div class="step" data-d="4">
-      <div class="step-h"><span class="step-n">8</span><span class="step-t">Upload object to a project</span><span class="step-app">Autodesk Forma</span></div>
+      <div class="step-h"><span class="step-n">8</span><span class="step-t">監視：以下のアクションをエラー監視する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>監視対象</dt><dd>ステップ 9（Upload object）</dd>
+      </dl>
+      <div class="note danger" style="margin:10px 0 0">
+        <span class="h">この監視ブロックを追加した理由（実機検証済み）</span>
+        <p>フェーズ1 を実際にテストしたところ、<b>ファイルを 1 つアップロードしただけなのに、Upload object の最終呼び出し（項目登録）が <code>409 ERR_CONFLICT</code>（"The entity id already existed"）で失敗する現象が、テストモード・本稼働のどちらでも 100% 再現した。</b>ただしファイル自体は正しく Forma 側に作成されており、実害（欠損・重複）は無い。原因を切り分けるため、以下を確認・除外した。</p>
+        <ul style="margin:8px 0 0">
+          <li><b>ジョブ一覧のフィルタ表示の問題</b> … フィルタを全解除しても件数は変わらず、除外</li>
+          <li><b>テスト実行と本稼働が同時にリスニングしていた</b> … 本稼働のみの状態で再試験しても同じ 409 が発生し、除外</li>
+          <li><b>Box 側が同一アップロードに対し 2 回 API 呼び出しを行っている</b> … その場合は Box 側のイベントも 2 回発行され、ジョブが 2 件に分かれるはずだが、ジョブ履歴には常に 1 件しか記録されないため、除外</li>
+        </ul>
+        <p style="margin-top:8px">唯一残った仮説は<b>「Workato の通信処理内部で、最初のリクエストの成功応答を受け取れず、自動的に同一リクエストを再送している」</b>というもの（Workato/Autodesk 側の内部実装に起因し、UI 上の情報だけでは確定できない）。デバッグタブのネットワークトレースにも、これを裏付ける・否定する決め手は見つからなかった。<b>根本原因は未解明のまま。</b>確定させるには Workato サポートへの問い合わせが必要（ジョブID 例：<code>j-AbPhMfpE-W8K8oH-CD</code>）。</p>
+      </div>
+      </div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">9</span><span class="step-t">Upload object to a project</span><span class="step-app">Autodesk Forma</span></div>
       <div class="step-b"><dl class="kv">
         <dt>Object</dt><dd><code>Document</code></dd>
         <dt>Account name / Project name</dt><dd>案件の値</dd>
@@ -1568,12 +1586,30 @@ File/folder source
       </dl></div>
     </div>
 
+    <div class="divider">エラーを検知したら（はい）</div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">10</span><span class="step-t">再試行しない</span><span class="step-app">監視ブロック設定</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>監視ブロック内のアクションをリトライしますか</dt><dd><code>リトライしない</code></dd>
+        <dt>理由</dt><dd><code>409 ERR_CONFLICT</code> は「既に他の実行が作成済み」という恒久的な競合であり、リトライしても同じ結果にしかならない</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">11</span><span class="step-t">ジョブの停止</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>ジョブレポートで、停止したジョブを次のようにマーク</dt><dd><code>成功</code></dd>
+        <dt>目的</dt><dd>本来は「既に同期済み」を意味する状態なので、ジョブ履歴を失敗として汚さない。ここでジョブが終了するため、後続のステップ 12（エントリー追加）は<b>実行されない</b>＝重複登録も防げる</dd>
+      </dl></div>
+    </div>
+
     <div class="step" data-d="4">
-      <div class="step-h"><span class="step-n">9</span><span class="step-t">エントリーを追加</span><span class="step-app">Lookup table</span></div>
+      <div class="step-h"><span class="step-n">12</span><span class="step-t">エントリーを追加</span><span class="step-app">Lookup table</span></div>
       <div class="step-b"><dl class="kv">
         <dt>box_id</dt><dd><span class="pill">File/folder source &gt; ID ステップ1</span></dd>
         <dt>type</dt><dd><code>file</code></dd>
-        <dt>forma_id</dt><dd><span class="pill">Document ID ステップ8</span></dd>
+        <dt>forma_id</dt><dd><span class="pill">Document ID ステップ9</span></dd>
         <dt>forma_parent_id</dt><dd><span class="pill">forma_id ステップ6</span></dd>
         <dt>last_name</dt><dd><span class="pill">File/folder source &gt; Name ステップ1</span></dd>
         <dt>status</dt><dd><code>done</code></dd>
@@ -1591,6 +1627,7 @@ File/folder source
     <li>Box の同期対象フォルダにファイルを 1 つ追加する</li>
     <li>Forma 側に同じファイルが上がっているか確認する</li>
     <li>対応表に <code>type = file</code> の行が 1 行増え、<code>forma_id</code> に <code>urn:adsk.wipprod:dm.lineage:…</code> が入っているか確認する</li>
+    <li>ジョブが「成功」で終わっているか確認する（ステップ9内部で409が出ていても、監視ブロックにより全体は成功扱いになる。詳細はステップ8の注記を参照）</li>
   </ol>
 
   <div class="note">
