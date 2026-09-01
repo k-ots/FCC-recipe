@@ -392,8 +392,9 @@ td code{font-size:12px;}
 .lit{font-family:"JetBrains Mono",monospace;font-size:12.5px;}
 .empty{color:var(--ink-3);font-size:12.5px;font-style:normal;}
 .fx{
-  display:inline-flex;background:var(--ink);color:var(--paper);border-radius:4px;
+  display:inline;background:var(--ink);color:var(--paper);border-radius:4px;
   padding:1px 8px;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;
+  white-space:normal;word-break:break-all;
 }
 
 .divider{
@@ -540,19 +541,19 @@ footer{
       <td class="nowrap">Forma Account name</td>
       <td class="lit">Build</td>
       <td><a href="#mig:s5">ステップ 15, 21</a></td>
-      <td><a href="#sync:y5">ステップ 8</a></td>
+      <td><a href="#sync:y5">ステップ 9, 17, 26</a></td>
     </tr>
     <tr>
       <td class="nowrap">Forma Project name</td>
       <td class="lit">202303_kondo_sample</td>
       <td><a href="#mig:s5">ステップ 15, 21</a></td>
-      <td><a href="#sync:y5">ステップ 8</a></td>
+      <td><a href="#sync:y5">ステップ 9, 17, 26</a></td>
     </tr>
     <tr>
       <td class="nowrap">対応表（Lookup table）名</td>
       <td class="lit">kondo_Box_Forma_Mapping</td>
       <td><a href="#mig:s5">ステップ 2, 4, 6, 13, 16, 18, 22, 23</a>（8 箇所）</td>
-      <td><a href="#sync:y5">ステップ 2, 5, 9</a>（フェーズ1 時点）</td>
+      <td><a href="#sync:y5">ステップ 2, 5, 12, 20, 23, 29</a>（フェーズ1〜3 時点）</td>
     </tr>
   </table></div>
 
@@ -562,8 +563,8 @@ footer{
   </div>
 
   <div class="note warn">
-    <span class="h">継続同期レシピはフェーズ1のみ反映</span>
-    <p>継続同期レシピは現在フェーズ1（新規ファイルのアップロード）までしか実装していない。フェーズ2 以降を実装すると、対応表や Forma Account / Project name を参照するステップがさらに増える。実装が進み次第この一覧も更新すること。</p>
+    <span class="h">継続同期レシピはフェーズ1〜3まで反映</span>
+    <p>継続同期レシピは<b>フェーズ1（新規ファイル）・フェーズ2（バージョン追加）・フェーズ3（フォルダ作成）</b>まで実装済み。フェーズ4（リネーム）以降を実装すると、対応表や Forma Account / Project name を参照するステップがさらに増える。実装が進み次第この一覧も更新すること。</p>
   </div>
 
   <h3>新しい案件での作業手順</h3>
@@ -686,7 +687,7 @@ footer{
     <tr><td><code>last_name</code></td><td>最後に同期したときの名前。リネーム検知に使用</td><td class="lit">意匠モデル</td></tr>
     <tr><td><code>status</code></td><td>走査状態。<b>フォルダのみ意味を持つ</b></td><td class="lit">to_scan / done</td></tr>
     <tr><td><code>last_synced_at</code></td><td>最終同期日時。障害調査用</td><td class="lit">2026-08-27T…</td></tr>
-    <tr><td><code>sha1</code></td><td>内容ハッシュ（本レシピでは未使用・空）</td><td class="empty">—</td></tr>
+    <tr><td><code>sha1</code></td><td>内容ハッシュ。<b>本レシピでは取得できないため常に空</b>（Box の一覧取得アクションの出力に含まれない）。継続同期レシピ側では記録される</td><td class="empty">—</td></tr>
   </table></div>
 
   <div class="note">
@@ -724,7 +725,7 @@ footer{
   <h3>ステップの入れ子構造</h3>
   <div class="tree">
     <ul>
-      <li><div class="tr-row"><span class="tr-n">1</span><span class="tr-k k-box">トリガー</span><span>Scheduler／5 分ごと（実行はテストボタン）</span></div></li>
+      <li><div class="tr-row"><span class="tr-n">1</span><span class="tr-k k-box">トリガー</span><span>HTTP Webhook（GET request）／実行はテストボタン</span></div></li>
       <li><div class="tr-row"><span class="tr-n">2</span><span class="tr-k k-lut">LUT</span><span>起点行を検索</span></div></li>
       <li><div class="tr-row"><span class="tr-n">3</span><span class="tr-k k-if">IF</span><span>件数 = 0（起点行が無い）</span></div>
         <ul><li><div class="tr-row"><span class="tr-n">4</span><span class="tr-k k-lut">LUT</span><span>起点行を追加</span></div></li></ul>
@@ -804,11 +805,21 @@ footer{
   <div class="steps">
 
     <div class="step" data-d="1">
-      <div class="step-h"><span class="step-n">1</span><span class="step-t">トリガー</span><span class="step-app">Scheduler</span></div>
+      <div class="step-h"><span class="step-n">1</span><span class="step-t">トリガー</span><span class="step-app">HTTP Webhook</span></div>
       <div class="step-b"><dl class="kv">
-        <dt>スケジュール</dt><dd><code>5 minutes</code> ごとに実行</dd>
-        <dt>実行方法</dt><dd>開発・本番とも「テスト」ボタンから手動実行する。<b>レシピを起動状態にしない</b></dd>
+        <dt>トリガー</dt><dd>Webhook 経由の新しいイベント（リアルタイム）</dd>
+        <dt>Event name</dt><dd><code>box_forma_migration</code></dd>
+        <dt>Webhook type</dt><dd><code>GET request</code></dd>
+        <dt>Payload / Query params / Headers</dt><dd class="empty">未定義。トリガー出力は後続ステップから一切参照していない</dd>
+        <dt>実行方法</dt><dd>レシピエディタの<b>「テスト」ボタン</b>から手動実行する</dd>
       </dl></div>
+    </div>
+
+    <div class="note danger">
+      <span class="h">Scheduler トリガーを使ってはならない</span>
+      <p>当初は <code>Scheduler</code>／5 分間隔で構築していたが、<b>実運用で破綻した</b>。本レシピは 1 ジョブが Box ツリー全体を歩くため、完了まで数分かかる。5 分間隔では<b>前のジョブが終わる前に次のジョブが起動</b>し、対応表がまだ埋まりきっていない状態で重複チェックを行うため、作成済みのフォルダを「未登録」と誤認して <code>409 ERR_CONFLICT</code> を多発させた。実測で <b>10 成功 / 23 失敗</b>、対応表には同一内容の重複行が発生している。</p>
+      <p style="margin-top:8px">Webhook トリガーであれば<b>リクエストが来ない限りジョブが起きない</b>ため、多重起動が構造的に発生しない。レシピを起動状態のまま放置しても安全である。</p>
+      <p style="margin-top:8px">実際の実行はテストボタンで行っており Webhook URL は使っていないが、それでも Scheduler に戻さないのは、誤って起動状態にしたときに上記の多重起動が再発するためである。なお <b>Webhook URL を知っている人は誰でもレシピを起動できる</b>ため、URL を公開の場所に記載しないこと。</p>
     </div>
 
     <div class="step" data-d="1">
@@ -844,7 +855,8 @@ footer{
         <dt>forma_parent_id</dt><dd class="empty">空欄</dd>
         <dt class="chg">last_name</dt><dd class="chg"><code>Forma同期フォルダ</code><span class="chg-tag">要変更</span></dd>
         <dt>status</dt><dd><code>to_scan</code></dd>
-        <dt>last_synced_at / sha1</dt><dd class="empty">空欄</dd>
+        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now.in_time_zone("Asia/Tokyo")</span></dd>
+        <dt>sha1</dt><dd class="empty">空欄</dd>
       </dl></div>
     </div>
 
@@ -961,7 +973,8 @@ footer{
         <dt>forma_parent_id</dt><dd><span class="pill">forma_id ステップ8</span></dd>
         <dt>last_name</dt><dd><span class="pill">Name ステップ10</span></dd>
         <dt>status</dt><dd><code>to_scan</code></dd>
-        <dt>last_synced_at / sha1</dt><dd class="empty">空欄</dd>
+        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now.in_time_zone("Asia/Tokyo")</span></dd>
+        <dt>sha1</dt><dd class="empty">空欄</dd>
       </dl></div>
     </div>
 
@@ -1025,13 +1038,27 @@ footer{
         <dt class="chg">Lookup table</dt><dd class="chg"><code>kondo_Box_Forma_Mapping</code><span class="chg-tag">要変更</span></dd>
         <dt>box_id</dt><dd><span class="pill">ID ステップ10</span></dd>
         <dt>type</dt><dd><code>file</code></dd>
-        <dt>forma_id</dt><dd><span class="pill">Document ID ステップ21</span></dd>
+        <dt>forma_id</dt><dd>フォーミュラ　<span class="pill">Document ID ステップ21</span><br><span class="fx">.gsub("fs.file:vf.", "dm.lineage:").gsub(/\?version=[0-9]+/, "")</span></dd>
         <dt>forma_parent_id</dt><dd><span class="pill">forma_id ステップ8</span></dd>
         <dt>last_name</dt><dd><span class="pill">Name ステップ10</span></dd>
         <dt>status</dt><dd><code>done</code></dd>
-        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now</span></dd>
+        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now.in_time_zone("Asia/Tokyo")</span></dd>
         <dt>sha1</dt><dd class="empty">空欄</dd>
       </dl></div>
+    </div>
+
+    <div class="note danger">
+      <span class="h">forma_id は必ず <code>dm.lineage</code> 形式で保存する</span>
+      <p>Forma のファイルには <b>2 つの ID 形式</b>がある。両者は同じファイルを指すが、用途が異なる。</p>
+      <table style="margin:10px 0">
+        <tr><th>形式</th><th>意味</th><th>用途</th></tr>
+        <tr><td class="lit">urn:adsk.wipprod:fs.file:vf.<b>XXXX</b>?version=N</td><td>バージョン単位</td><td>特定の版を指す</td></tr>
+        <tr><td class="lit">urn:adsk.wipprod:dm.lineage:<b>XXXX</b></td><td>ファイル単位</td><td><b>対応表に保存するのはこちら</b></td></tr>
+      </table>
+      <p><b>バージョン形式を保存すると、継続同期レシピのフェーズ2（バージョン追加）が動作しない。</b><code>Upload document</code> の <code>File ID</code> 欄にバージョン形式を渡すと <code>400 BAD_INPUT: The object is not the correct type</code> で失敗する。</p>
+      <p style="margin-top:8px"><b>ステップ 21 の出力がどちらの形式を返すかは、環境や実行タイミングで揺れることが確認されている。</b>レシピデータのプレビューには <code>dm.lineage</code> 形式が表示されるにもかかわらず、実際に保存された値は全行バージョン形式だった、という事象が実機で発生した（原因未解明）。そのためステップ 22 では、<b>どちらの形式が来ても正しい値になる変換式</b>を使っている。</p>
+      <p style="margin-top:8px">この式は「<code>?</code> 以降を除去」→「<code>fs.file:vf.</code> を <code>dm.lineage:</code> に置換」を行う。すでに <code>dm.lineage</code> 形式であれば置換対象がなく素通りするため、二重に変換される心配はない。<b>両形式の <code>XXXX</code> 部分は完全に同一</b>であることを実データで確認済み。</p>
+      <p style="margin-top:8px"><b>Workato のフォーミュラ欄では、データピルを手打ちしてはならない。</b>必ずレシピデータパネルからドラッグする。手打ちすると「数式にエラーがあります」が消えない。ドラッグしたピルはチップとして描画されるので見分けられる。</p>
     </div>
 
     <div class="divider">フォルダの走査完了</div>
@@ -1125,12 +1152,17 @@ footer{
   </ol>
 
   <h3>実行</h3>
-  <p>レシピエディタの<b>「テスト」ボタン</b>から実行する。Scheduler トリガーだが、スケジュールを待たずその場で 1 回実行される。</p>
+  <p>レシピエディタの<b>「テスト」ボタン</b>から実行する。Webhook トリガーのため、リクエストを送らない限りジョブは起きない。テスト実行でも <b>Forma への作成・対応表への書き込みは本番同様に行われる</b>。</p>
 
   <div class="note warn">
-    <span class="h">レシピを起動状態にしないこと</span>
-    <p>本レシピは 5 分間隔の Scheduler トリガーを持つ。保存後に「起動」すると<b>5 分ごとに移行処理が繰り返される</b>。必ずテストボタンからのみ実行すること。</p>
-    <p style="margin-top:8px">移行完了後はレシピを停止したまま保管し、<b>次の案件では複製して設定値を差し替えて使用する</b>（<a href="#mig:s8">08 テンプレートとしての流用</a>）。完成済みのレシピを直接書き換えると、テンプレートとして参照できる状態が失われる。</p>
+    <span class="h">1 回で完了しない場合がある</span>
+    <p>1 ジョブで Box ツリー全体を歩き切る設計だが、対象が多い場合は <code>status=to_scan</code> の行を残したまま終了することがある。その場合は<b>もう一度実行すれば続きから処理される</b>。<code>to_scan</code> が 0 件になるまで繰り返すこと。</p>
+    <p style="margin-top:8px">実測では、フォルダ 7・ファイル 21（計 28 行）の構成で約 7 分・1 ジョブで完走している。</p>
+  </div>
+
+  <div class="note">
+    <span class="h">テンプレートとして保管する</span>
+    <p>移行完了後は、<b>次の案件では複製して設定値を差し替えて使用する</b>（<a href="#mig:s8">08 テンプレートとしての流用</a>）。完成済みのレシピを直接書き換えると、テンプレートとして参照できる状態が失われる。</p>
   </div>
 
   <h3>実行後の確認</h3>
@@ -1234,11 +1266,11 @@ footer{
     </tr>
     <tr>
       <td class="nowrap"><b><code>sha1</code> 列</b></td>
-      <td>Box の一覧取得アクションの出力に <code>sha1</code> が含まれないため常に空。内容の同一性判定が必要になった場合は、代替として <code>Etag</code> の利用を検討する</td>
+      <td>Box の一覧取得アクションの出力に <code>sha1</code> が含まれないため常に空。継続同期レシピ側では記録される（<a href="#sync:y5">Part 2 / 05</a>）。内容の同一性判定が必要になった場合は、代替として <code>Etag</code> の利用を検討する</td>
     </tr>
     <tr>
-      <td class="nowrap"><b><code>last_synced_at</code> 列</b></td>
-      <td>ファイル行（ステップ 22）のみ <code>now</code> を設定している。フォルダ行（ステップ 16）は空欄のため、記録を揃えたい場合はステップ 16 にも同様の設定を追加する</td>
+      <td class="nowrap"><b>タイムゾーン</b></td>
+      <td>Workato の <code>now</code> は<b>アカウント設定のタイムゾーン（既定では太平洋時間）</b>を返す。日本時間で記録するため、<code>last_synced_at</code> には必ず <span class="fx">now.in_time_zone("Asia/Tokyo")</span> を使う。ジョブ履歴の時刻表示も同じ設定に従うため、Box・Forma の画面（ブラウザのローカル時刻）と照合するときは時差に注意する</td>
     </tr>
     <tr>
       <td class="nowrap"><b>Forma 側の既存データ</b></td>
@@ -1278,7 +1310,7 @@ footer{
     <div class="part-meta">
       <span><b>トリガー</b>　リアルタイム（Webhook）</span>
       <span><b>対象イベント</b>　10 種</span>
-      <span><b>状態</b>　フェーズ1 実装中</span>
+      <span><b>状態</b>　フェーズ1〜3 完了 / 4〜6 未着手</span>
     </div>
   </div>
   <div class="index-grid">
@@ -1437,11 +1469,18 @@ File/folder source
     <ul>
       <li><div class="tr-row"><span class="tr-n">1</span><span class="tr-k k-box">トリガー</span><span>フォルダ内での新しいイベント</span></div></li>
       <li><div class="tr-row"><span class="tr-n">2</span><span class="tr-k k-lut">LUT</span><span>対応表を検索（box_id = 対象の ID）／全分岐で使用</span></div></li>
-      <li><div class="tr-row"><span class="tr-n">3</span><span class="tr-k k-if">IF</span><span>Event = FILE.UPLOADED　<span class="ph ph-now">フェーズ1</span></span></div>
-        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>新規アップロード／バージョン追加</span></div></li></ul>
+      <li><div class="tr-row"><span class="tr-n">3</span><span class="tr-k k-if">IF</span><span>Event = FILE.UPLOADED</span></div>
+        <ul>
+          <li><div class="tr-row"><span class="tr-n">4</span><span class="tr-k k-if">IF</span><span>未登録 かつ 0 B でない　<span class="ph ph-done">フェーズ1</span></span></div>
+            <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>新規アップロード（ステップ 5〜12）</span></div></li></ul>
+          </li>
+          <li><div class="tr-row"><span class="tr-n">13</span><span class="tr-k k-if">IF</span><span>登録済み かつ 0 B でない　<span class="ph ph-done">フェーズ2</span></span></div>
+            <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>バージョン追加（ステップ 14〜20）</span></div></li></ul>
+          </li>
+        </ul>
       </li>
-      <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = FOLDER.CREATED　<span class="ph ph-now">フェーズ3</span></span></div>
-        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>フォルダ作成（詳細は <a href="#sync:y5">05</a>）</span></div></li></ul>
+      <li><div class="tr-row"><span class="tr-n">21</span><span class="tr-k k-if">IF</span><span>Event = FOLDER.CREATED　<span class="ph ph-done">フェーズ3</span></span></div>
+        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>フォルダ作成（ステップ 22〜29）</span></div></li></ul>
       </li>
       <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.RENAMED　<span class="ph ph-todo">フェーズ4</span></span></div></li>
       <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.MOVED　<span class="ph ph-todo">フェーズ5</span></span></div></li>
@@ -1463,9 +1502,9 @@ File/folder source
 
   <div class="tw"><table>
     <tr><th>#</th><th>対象</th><th>内容</th><th>状態</th></tr>
-    <tr><td class="nowrap">1</td><td class="nowrap">FILE.UPLOADED<br><span class="empty">新規のみ</span></td><td>未登録のファイルを新規アップロードし、対応表に登録する。移行レシピとほぼ同じ部品</td><td><span class="ph ph-now">実装中</span></td></tr>
-    <tr><td class="nowrap">2</td><td class="nowrap">FILE.UPLOADED<br><span class="empty">更新</span></td><td>登録済みファイルに新バージョンを追加する。<b>実装方式が未確定</b>（<a href="#sync:y6">06</a>）</td><td><span class="ph ph-todo">未着手</span></td></tr>
-    <tr><td class="nowrap">3</td><td class="nowrap">FOLDER.CREATED</td><td>親を解決してフォルダを作成し、対応表に登録する。単体の空フォルダ作成では動作確認済み。<b>入れ子のフォルダ・ファイルを含むフォルダの一括アップロードは未検証</b>（<a href="#sync:y6">06</a>）</td><td><span class="ph ph-now">実装中</span></td></tr>
+    <tr><td class="nowrap">1</td><td class="nowrap">FILE.UPLOADED<br><span class="empty">新規のみ</span></td><td>未登録のファイルを新規アップロードし、対応表に登録する。移行レシピとほぼ同じ部品</td><td><span class="ph ph-done">完了</span></td></tr>
+    <tr><td class="nowrap">2</td><td class="nowrap">FILE.UPLOADED<br><span class="empty">更新</span></td><td>登録済みファイルに新バージョンを追加する。<code>Upload document</code> の <code>File ID</code> 欄に lineage 形式の ID を渡す方式で実装（<a href="#sync:y5">05</a>）。テスト・本稼働の両モードで検証済み</td><td><span class="ph ph-done">完了</span></td></tr>
+    <tr><td class="nowrap">3</td><td class="nowrap">FOLDER.CREATED</td><td>親を解決してフォルダを作成し、対応表に登録する。入れ子フォルダ・ファイルを含むフォルダの一括アップロードも本稼働モードで確認済み（<a href="#sync:y6">06</a>）</td><td><span class="ph ph-done">完了</span></td></tr>
     <tr><td class="nowrap">4</td><td class="nowrap">*.RENAMED</td><td>Forma 側を改名する。フォルダから先に着手すると容易</td><td><span class="ph ph-todo">未着手</span></td></tr>
     <tr><td class="nowrap">5</td><td class="nowrap">*.MOVED</td><td>Forma 側の親フォルダを変更する</td><td><span class="ph ph-todo">未着手</span></td></tr>
     <tr><td class="nowrap">6</td><td class="nowrap">*.TRASHED<br>*.RESTORED</td><td>削除と復元。影響範囲が大きいため最後に実装する</td><td><span class="ph ph-todo">未着手</span></td></tr>
@@ -1612,15 +1651,28 @@ File/folder source
       <div class="step-b"><dl class="kv">
         <dt>box_id</dt><dd><span class="pill">File/folder source &gt; ID ステップ1</span></dd>
         <dt>type</dt><dd><code>file</code></dd>
-        <dt>forma_id</dt><dd><span class="pill">Document ID ステップ9</span></dd>
+        <dt>forma_id</dt><dd>フォーミュラ　<span class="pill">Document ID ステップ9</span><br><span class="fx">.gsub("fs.file:vf.", "dm.lineage:").gsub(/\?version=[0-9]+/, "")</span></dd>
         <dt>forma_parent_id</dt><dd><span class="pill">forma_id ステップ6</span></dd>
         <dt>last_name</dt><dd><span class="pill">File/folder source &gt; Name ステップ1</span></dd>
         <dt>status</dt><dd><code>done</code></dd>
-        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now</span></dd>
-        <dt>sha1</dt><dd><span class="pill">File/folder source &gt; Sha 1 ステップ1</span>　<span class="empty">移行レシピでは取得できなかったが、こちらでは取得できる</span></dd>
+        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now.in_time_zone("Asia/Tokyo")</span></dd>
+        <dt>sha1</dt><dd><span class="pill">File/folder source &gt; Sha 1 ステップ1</span>　<span class="empty">移行レシピでは取得できないが、こちらでは取得できる</span></dd>
       </dl></div>
     </div>
 
+  </div>
+
+  <div class="note danger">
+    <span class="h">forma_id はバージョン形式で保存してはならない</span>
+    <p><code>Upload document</code> の出力 <code>Document ID</code> は、<code>urn:adsk.wipprod:fs.file:vf.XXXX?version=N</code>（バージョン単位）を返すことがある。この形式のまま保存すると、<b>フェーズ2（バージョン追加）が <code>400 BAD_INPUT: The object is not the correct type</code> で失敗する</b>。</p>
+    <p style="margin-top:8px">対応表に保存するのは <code>urn:adsk.wipprod:dm.lineage:XXXX</code>（ファイル単位）でなければならない。両形式の <code>XXXX</code> 部分は同一なので、変換式で確実に正しい形式へ揃えている。すでに <code>dm.lineage</code> 形式なら置換対象がなく素通りするため、どちらが来ても安全である。詳細は<a href="#mig:s5">移行レシピ ステップ 22 の注記</a>と同じ。</p>
+  </div>
+
+  <div class="note">
+    <span class="h">sha1 は記録のみで、判定には使っていない</span>
+    <p><code>sha1</code> はファイル内容のハッシュで、中身が同じなら同じ値になる。<b>どのステップからも参照しておらず、分岐条件には使っていない。</b></p>
+    <p style="margin-top:8px">「sha1 が前回と同じならバージョンを追加しない」という実装も考えられるが、<b>採用しない</b>。Box は中身を変えずに再アップロードしても版数が上がる仕様であり、sha1 で差分判定すると <b>Box の版数と Forma の版数がずれる</b>。Box の履歴をそのまま再現するのが本レシピの目的なので、<code>FILE.UPLOADED</code> が来たら無条件にバージョンを追加するのが正しい。</p>
+    <p style="margin-top:8px">それでも記録しているのは、<b>障害調査と将来の突合バッチのため</b>。「Forma にある版が Box のどの内容に対応するか」を後から追える。記録コストはトリガー出力をそのまま入れるだけで、実質ゼロである。</p>
   </div>
 
   <h3>動作確認</h3>
@@ -1633,9 +1685,122 @@ File/folder source
     <li>ジョブが「成功」で終わっているか確認する（ステップ9内部で409が出ていても、監視ブロックにより全体は成功扱いになる。詳細はステップ8の注記を参照）</li>
   </ol>
 
+  <div class="note warn">
+    <span class="h">単一取得アクションに置き換えてはならない</span>
+    <p>ステップ 5・6 は「検索 → 繰り返し」の 2 ステップだが、<code>Lookup entry</code>（単一取得）に置き換えて 1 ステップにしたくなる。<b>これは実機で検証済みの誤りである。</b></p>
+    <p style="margin-top:8px">単一取得は該当なしのとき <code>Unable to find an entry matching search parameters</code> で<b>ジョブがエラー停止</b>する。しかも「見つからなければ無視する」ような抑制オプションは存在しない。「見つからない」が正常系となる用途では使えない。</p>
+    <p style="margin-top:8px">複数取得は該当なしのとき空リスト <code>Entries: []</code> を正常に返すため、<code>List size = 0</code> で判定でき、繰り返しも 0 回で安全に素通りする。<b>この 2 ステップ構成が正解</b>である。</p>
+  </div>
+
+  <h3>フェーズ2 の構成</h3>
+  <p><b>FILE.UPLOADED（登録済みファイルの更新）</b>。ステップ4（未登録かつ 0 B でない）の<b>「いいえ」の枝</b>に追加する。共通のステップ2（登録済み判定）の結果をそのまま使うため、親フォルダを検索し直す必要がない。</p>
+
+  <div class="note ok">
+    <span class="h">親フォルダの再検索が不要な理由</span>
+    <p>この分岐に入る時点で、ステップ2 の検索結果に<b>対象ファイルの既存行が入っている</b>。その行には <code>forma_id</code>（ファイルの lineage ID）と <code>forma_parent_id</code>（親フォルダの Forma ID）が既に記録されているため、両方をそのまま <code>Upload document</code> に渡せる。フェーズ1 のステップ 5・6 にあたる親フォルダ検索は省ける。</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step" data-d="2">
+      <div class="step-h"><span class="step-n">13</span><span class="step-t">IF 条件を設定する</span><span class="step-app">ロジック</span><span class="step-br">4 → いいえ</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>条件1</dt><dd><span class="pill">List size ステップ2</span>　が <code>0</code> より大きい　<span class="empty">＝対応表に登録済み</span></dd>
+        <dt>結合</dt><dd><code>かつ</code></dd>
+        <dt>条件2</dt><dd><span class="pill">File/folder source &gt; Size ステップ1</span>　が <code>0</code> より大きい　<span class="empty">＝0 B ファイルを除外</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="3">
+      <div class="step-h"><span class="step-n">14</span><span class="step-t">各アイテムに対して繰り返す</span><span class="step-app">ロジック</span><span class="step-br">13 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>入力リスト</dt><dd><span class="pill">Entries ステップ2</span></dd>
+        <dt>目的</dt><dd>検索結果は 1 件だが、複数取得の出力はリストのため繰り返しで取り出す。フェーズ1 のステップ6 と同じ構造</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">15</span><span class="step-t">Box内のファイルからコンテンツをダウンロード</span><span class="step-app">Box</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>種別</dt><dd><code>ファイル</code></dd>
+        <dt>File ID</dt><dd><span class="pill">File/folder source &gt; ID ステップ1</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">16</span><span class="step-t">監視：以下のアクションをエラー監視する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>監視対象</dt><dd>ステップ 17（Upload document）</dd>
+        <dt>目的</dt><dd>フェーズ1 のステップ8 と同じ。二重実行などで失敗した場合にジョブ履歴を汚さない</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">17</span><span class="step-t">Upload document to a project</span><span class="step-app">Autodesk Forma</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt class="chg">Account name</dt><dd class="chg"><code>Build</code><span class="chg-tag">要変更</span></dd>
+        <dt class="chg">Project name</dt><dd class="chg"><code>202303_kondo_sample</code><span class="chg-tag">要変更</span></dd>
+        <dt>Folder ID</dt><dd><code>Enter folder ID</code> →　<span class="pill">forma_parent_id ステップ14</span></dd>
+        <dt>Name</dt><dd><span class="pill">File/folder source &gt; Name ステップ1</span></dd>
+        <dt>File content</dt><dd><span class="pill">File contents ステップ15</span></dd>
+        <dt>File ID</dt><dd><code>Enter file ID</code> →　<span class="pill">forma_id ステップ14</span>　<span class="empty">ここがバージョン追加の要</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">18</span><span class="step-t">再試行しない</span><span class="step-app">監視ブロック設定</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>設定</dt><dd><code>リトライしない</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">19</span><span class="step-t">ジョブの停止</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>ジョブレポートのマーク</dt><dd><code>成功</code></dd>
+        <dt>目的</dt><dd>ここで終了するため、後続のステップ 20（エントリー更新）は実行されない</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">20</span><span class="step-t">エントリーを更新</span><span class="step-app">Lookup table</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt class="chg">Lookup table</dt><dd class="chg"><code>kondo_Box_Forma_Mapping</code><span class="chg-tag">要変更</span></dd>
+        <dt>Entry ID</dt><dd><span class="pill">Entry ID ステップ14</span>　<span class="empty">対応表の行 ID。box_id ではない</span></dd>
+        <dt>Ignore if not found</dt><dd><code>いいえ</code>　<span class="empty">この分岐では必ず存在するため、無ければエラーで気づける方がよい</span></dd>
+        <dt>box_id</dt><dd><span class="pill">File/folder source &gt; ID ステップ1</span></dd>
+        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now.in_time_zone("Asia/Tokyo")</span></dd>
+        <dt>sha1</dt><dd><span class="pill">File/folder source &gt; Sha 1 ステップ1</span></dd>
+        <dt>その他の列</dt><dd class="empty">すべて空欄。空欄の列は上書きされず既存値が保持される</dd>
+      </dl></div>
+    </div>
+
+  </div>
+
+  <div class="note ok">
+    <span class="h">forma_id を更新しない理由</span>
+    <p>バージョンが増えても <b>lineage ID は変わらない</b>。<code>urn:adsk.wipprod:dm.lineage:XXXX</code> はファイルそのものを指す ID であり、V1 でも V5 でも同一である。したがって <code>forma_id</code> は空欄のままでよく、既存値がそのまま保持される。実機で V1→V2→V3 と更新しても値が変化しないことを確認済み。</p>
+  </div>
+
+  <div class="note danger">
+    <span class="h">二重実行が起きても 409 にならない</span>
+    <p>フェーズ1（新規アップロード）では、二重実行の 2 回目は<b>同名ファイルの衝突で 409</b> になり、エラー監視ブロックが吸収していた。</p>
+    <p style="margin-top:8px"><b>フェーズ2 では 409 が発生しない。</b>バージョン追加は何度実行しても成功するため、二重実行が起きると <b>V2 と V3 が連続で作られる</b>。エラーにならないので監視ブロックでは防げず、対応表を見ても気づけない。</p>
+    <p style="margin-top:8px">テスト時・本稼働時とも、<b>Forma のバージョン番号が 1 つだけ増えているか</b>を必ず確認すること。実測ではテストモード・本稼働モードのいずれでも二重実行は発生しなかった（V1→V2→V3）が、他フェーズでは二重実行が観測されているため、確認は省略しないこと。</p>
+  </div>
+
+  <h3>フェーズ2 動作確認</h3>
+  <ol>
+    <li>Box の同期対象フォルダに、<b>既に同期済みのファイルと同名のファイル</b>を上書きアップロードする</li>
+    <li>Forma 側でバージョンが <b>1 つだけ</b>増えているか確認する（V1 → V2）</li>
+    <li>対応表の該当行で <code>last_synced_at</code> と <code>sha1</code> が更新されているか確認する</li>
+    <li><code>forma_id</code> が<b>変化していない</b>ことを確認する</li>
+    <li>ジョブ履歴で、ステップ4 が「条件が満たされませんでした」となり、いいえ側のフェーズ2 に流れているか確認する</li>
+  </ol>
+
   <div class="note">
-    <span class="h">簡略化の余地</span>
-    <p>ステップ 5・6 は、<code>Lookup entry</code>（単一取得）が使えれば 1 ステップに減らせる可能性がある。ただし該当なしのときの挙動が未確認のため、まずは確実に動く繰り返し方式で構築する。</p>
+    <span class="h">同じ内容を再アップロードしても版が増える</span>
+    <p>中身を変えずに再アップロードした場合も <code>sha1</code> は変わらないが、<b>Forma のバージョンは増える</b>。これは Box 側の挙動に合わせた意図的な設計で、不具合ではない。理由は<a href="#sync:y5">ステップ 12 の sha1 に関する注記</a>を参照。</p>
   </div>
 
   <h3>フェーズ3 の構成</h3>
@@ -1644,7 +1809,7 @@ File/folder source
   <div class="steps">
 
     <div class="step" data-d="1">
-      <div class="step-h"><span class="step-n">13</span><span class="step-t">ELSE IF 条件を設定する</span><span class="step-app">ロジック</span></div>
+      <div class="step-h"><span class="step-n">21</span><span class="step-t">ELSE IF 条件を設定する</span><span class="step-app">ロジック</span></div>
       <div class="step-b"><dl class="kv">
         <dt>データフィールド</dt><dd><span class="pill">Event ステップ1</span></dd>
         <dt>条件</dt><dd>に等しいなら</dd>
@@ -1653,7 +1818,7 @@ File/folder source
     </div>
 
     <div class="step" data-d="2">
-      <div class="step-h"><span class="step-n">14</span><span class="step-t">IF 条件を設定する</span><span class="step-app">ロジック</span><span class="step-br">13 → はい</span></div>
+      <div class="step-h"><span class="step-n">22</span><span class="step-t">IF 条件を設定する</span><span class="step-app">ロジック</span><span class="step-br">21 → はい</span></div>
       <div class="step-b"><dl class="kv">
         <dt>データフィールド</dt><dd><span class="pill">List size ステップ2</span>　<span class="empty">共通のステップ2を再利用。フェーズ1と違い Size の条件は付けない（フォルダの Size は配下合計のため、0バイト除外の対象外）</span></dd>
         <dt>条件</dt><dd>に等しいなら</dd>
@@ -1662,7 +1827,7 @@ File/folder source
     </div>
 
     <div class="step" data-d="3">
-      <div class="step-h"><span class="step-n">15</span><span class="step-t">エントリーを検索</span><span class="step-app">Lookup table・複数取得</span><span class="step-br">14 → はい</span></div>
+      <div class="step-h"><span class="step-n">23</span><span class="step-t">エントリーを検索</span><span class="step-app">Lookup table・複数取得</span><span class="step-br">22 → はい</span></div>
       <div class="step-b"><dl class="kv">
         <dt>Lookup table</dt><dd>案件の対応表</dd>
         <dt>Search by → box_id</dt><dd><span class="pill">File/folder source &gt; Parent &gt; ID ステップ1</span></dd>
@@ -1671,7 +1836,7 @@ File/folder source
     </div>
 
     <div class="step" data-d="3">
-      <div class="step-h"><span class="step-n">16</span><span class="step-t">各アイテムに対して繰り返す</span><span class="step-app">ロジック</span></div>
+      <div class="step-h"><span class="step-n">24</span><span class="step-t">各アイテムに対して繰り返す</span><span class="step-app">ロジック</span></div>
       <div class="step-b"><dl class="kv">
         <dt>リストを入力</dt><dd><span class="pill">Entries ステップ15</span></dd>
         <dt>役割</dt><dd>フェーズ1のステップ5・6と同じ理由。<b>親フォルダが対応表に無い場合は 0 周となり、何もせず終了する</b>（安全弁）</dd>
@@ -1679,14 +1844,14 @@ File/folder source
     </div>
 
     <div class="step" data-d="4">
-      <div class="step-h"><span class="step-n">17</span><span class="step-t">監視：以下のアクションをエラー監視する</span><span class="step-app">ロジック</span></div>
+      <div class="step-h"><span class="step-n">25</span><span class="step-t">監視：以下のアクションをエラー監視する</span><span class="step-app">ロジック</span></div>
       <div class="step-b"><dl class="kv">
         <dt>監視対象</dt><dd>ステップ 18（Create folder）</dd>
       </dl></div>
     </div>
 
     <div class="step" data-d="5">
-      <div class="step-h"><span class="step-n">18</span><span class="step-t">Create folder in a project</span><span class="step-app">Autodesk Forma</span></div>
+      <div class="step-h"><span class="step-n">26</span><span class="step-t">Create folder in a project</span><span class="step-app">Autodesk Forma</span></div>
       <div class="step-b"><dl class="kv">
         <dt>Object</dt><dd><code>Folder</code></dd>
         <dt>Account name / Project name</dt><dd>案件の値</dd>
@@ -1698,21 +1863,21 @@ File/folder source
     <div class="divider">エラーを検知したら（はい）</div>
 
     <div class="step" data-d="5">
-      <div class="step-h"><span class="step-n">19</span><span class="step-t">再試行しない</span><span class="step-app">監視ブロック設定</span></div>
+      <div class="step-h"><span class="step-n">27</span><span class="step-t">再試行しない</span><span class="step-app">監視ブロック設定</span></div>
       <div class="step-b"><dl class="kv">
         <dt>監視ブロック内のアクションをリトライしますか</dt><dd><code>リトライしない</code></dd>
       </dl></div>
     </div>
 
     <div class="step" data-d="5">
-      <div class="step-h"><span class="step-n">20</span><span class="step-t">ジョブの停止</span><span class="step-app">ロジック</span></div>
+      <div class="step-h"><span class="step-n">28</span><span class="step-t">ジョブの停止</span><span class="step-app">ロジック</span></div>
       <div class="step-b"><dl class="kv">
         <dt>ジョブレポートで、停止したジョブを次のようにマーク</dt><dd><code>成功</code></dd>
       </dl></div>
     </div>
 
     <div class="step" data-d="4">
-      <div class="step-h"><span class="step-n">21</span><span class="step-t">エントリーを追加</span><span class="step-app">Lookup table</span></div>
+      <div class="step-h"><span class="step-n">29</span><span class="step-t">エントリーを追加</span><span class="step-app">Lookup table</span></div>
       <div class="step-b"><dl class="kv">
         <dt>box_id</dt><dd><span class="pill">File/folder source &gt; ID ステップ1</span></dd>
         <dt>type</dt><dd><code>folder</code></dd>
@@ -1733,7 +1898,7 @@ File/folder source
 
   <div class="note danger">
     <span class="h">未検証：入れ子のフォルダ・ファイルを含むフォルダの一括アップロード</span>
-    <p>単体の空フォルダ作成では動作確認済み。しかし<b>「フォルダの中にサブフォルダがある」「フォルダの中にファイルがある」状態のフォルダを丸ごとアップロードした場合は未検証</b>。この場合、親フォルダの <code>FOLDER.CREATED</code> と、配下のサブフォルダ／ファイルのイベントが短時間で連続して発生する。もし親フォルダの対応表登録が完了する前に配下のイベントが処理されると、ステップ 5〜6（フェーズ1）・ステップ 15〜16（フェーズ3）の安全弁が働き、<b>配下のアイテムが対応表に見つからず、エラーにもならず静かにスキップされる</b>（同期漏れ）。詳細は <a href="#sync:y6">06 未確定事項</a>。</p>
+    <p>単体の空フォルダ作成では動作確認済み。しかし<b>「フォルダの中にサブフォルダがある」「フォルダの中にファイルがある」状態のフォルダを丸ごとアップロードした場合は未検証</b>。この場合、親フォルダの <code>FOLDER.CREATED</code> と、配下のサブフォルダ／ファイルのイベントが短時間で連続して発生する。もし親フォルダの対応表登録が完了する前に配下のイベントが処理されると、ステップ 5〜6（フェーズ1）・ステップ 23〜24（フェーズ3）の安全弁が働き、<b>配下のアイテムが対応表に見つからず、エラーにもならず静かにスキップされる</b>（同期漏れ）。詳細は <a href="#sync:y6">06 未確定事項</a>。</p>
   </div>
 
   <h3>フェーズ3 動作確認</h3>
@@ -1752,16 +1917,10 @@ File/folder source
   <div class="tw"><table>
     <tr><th>#</th><th>項目</th><th>影響</th><th>確認方法</th></tr>
     <tr>
-      <td class="nowrap"><span class="ph ph-open">重要</span></td>
-      <td><b>入れ子のフォルダ・ファイルを含むフォルダを丸ごとアップロードしたときの同期漏れ</b></td>
-      <td>親フォルダの登録が完了する前に配下のイベントが処理されると、安全弁（0周ループ）が働いて<b>配下のアイテムがエラーも出さず静かにスキップされる</b>可能性がある（<a href="#sync:y5">05 フェーズ3の構成</a>）。フェーズ3実装により実機で検証可能になった</td>
-      <td>Boxで「サブフォルダを含むフォルダ」「ファイルを含むフォルダ」をそれぞれアップロードし、対応表・Forma側の両方でBox側の構成と過不足なく一致しているか確認する</td>
-    </tr>
-    <tr>
-      <td class="nowrap"><span class="ph ph-open">重要</span></td>
-      <td><b><code>Upload object</code> の「File name」欄で既存 item にバージョン追加ができるか</b></td>
-      <td>フェーズ2（ファイル更新）の実装方式が決まる。できない場合は <code>POST versions</code> のカスタムアクションが必要となり、実装量が増える</td>
-      <td>単発レシピで、対応表から引いた <code>forma_id</code> を「File name」に渡してアップロードを試す</td>
+      <td class="nowrap"></td>
+      <td><b>入れ子のフォルダ・ファイルを含むフォルダを丸ごとアップロードしたときの同期漏れ</b><br><span class="ph ph-done">検証済み</span></td>
+      <td>理論上は、親フォルダの登録が完了する前に配下のイベントが処理されると安全弁（0周ループ）が働き、<b>配下のアイテムがエラーも出さず静かにスキップされる</b>。<b>本稼働モードでの実測では発生しなかった</b>（入れ子フォルダのみ・フォルダ＋ファイル混在のいずれも、対応表と Forma の両方で過不足なく一致）。ただし高負荷・多数同時投入の条件では未検証のため、リスクとしては残る</td>
+      <td>運用開始後、大量アップロード時に対応表の件数と Box 側の件数を突き合わせる</td>
     </tr>
     <tr>
       <td class="nowrap"><span class="ph ph-open">重要</span></td>
@@ -1783,12 +1942,6 @@ File/folder source
     </tr>
     <tr>
       <td class="nowrap"></td>
-      <td><code>Lookup entry</code> の該当なし時の挙動</td>
-      <td>エラー停止か空返却かで、ステップ 5・6 を 1 ステップに簡略化できるかが決まる</td>
-      <td>存在しない <code>box_id</code> で検索を実行する</td>
-    </tr>
-    <tr>
-      <td class="nowrap"></td>
       <td>レート制限（429）の発生頻度</td>
       <td>1 イベント 1 ファイルの処理のため、移行レシピほど問題にならない見込み。多数のファイルを一度に Box へ投入した場合は発生しうる</td>
       <td>運用開始後にジョブ履歴で確認する</td>
@@ -1798,7 +1951,8 @@ File/folder source
   <h3>設計上の既知の課題</h3>
   <div class="note danger">
     <span class="h">同名ファイルのアップロードは自動でバージョン追加にならない</span>
-    <p>一括移行レシピ（<a href="#mig">Part 1</a>）の構築時に判明した制約。<code>Upload object</code> は同名ファイルが存在すると <code>409 ERR_CONFLICT</code> を返す。したがってファイル更新時は、フェーズ1（新規アップロード）とは<b>別の処理経路</b>が必要となる。これがフェーズ2 を分けている理由。</p>
+    <p>一括移行レシピ（<a href="#mig">Part 1</a>）の構築時に判明した制約。<code>Upload document</code> は同名ファイルが存在すると <code>409 ERR_CONFLICT</code> を返す。したがってファイル更新時は、フェーズ1（新規アップロード）とは<b>別の処理経路</b>が必要となる。これがフェーズ2 を分けている理由。</p>
+    <p style="margin-top:8px"><b>解決済み。</b><code>File ID</code> 欄を <code>Enter file ID</code> モードにして <code>dm.lineage</code> 形式の ID を渡すことで、バージョン追加として処理される。欄のヘルプにも「If versioning an existing file, provide file ID.」と明記されている。実装は<a href="#sync:y5">05 フェーズ2 の構成</a>を参照。</p>
   </div>
 
   <div class="note warn">
