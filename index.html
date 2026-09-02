@@ -276,29 +276,35 @@ td code{font-size:12px;}
 
 /* ---------- structure diagram ---------- */
 .tree{
-  background:var(--surface);border:1px solid var(--rule);border-radius:9px;
-  padding:20px 22px;overflow-x:auto;margin-bottom:20px;box-shadow:var(--shadow);
+  background:var(--surface-2);border:1px solid var(--rule);border-radius:9px;
+  padding:20px 18px;overflow-x:auto;margin-bottom:20px;
 }
 .tree ul{list-style:none;margin:0;padding:0;max-width:none;}
-.tree li{margin:0;padding:4px 0;}
-.tree > ul > li{padding:7px 0;}
-.tree > ul > li > ul{margin:6px 0 6px 12px;padding-left:20px;border-left:1px dashed var(--rule-strong);}
-.tree ul ul ul{margin:6px 0 6px 12px;padding-left:20px;border-left:1px dashed var(--rule-strong);}
-.tr-row{display:flex;gap:8px;align-items:baseline;font-size:13px;white-space:nowrap;}
-.tr-n{
-  font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-3);
-  min-width:36px;text-align:right;flex:none;
+.tree li{margin:0;padding:5px 0;}
+.tree > ul > li{padding:6px 0;}
+.tree > ul > li > ul,.tree ul ul ul{
+  margin:6px 0 6px 46px;padding-left:22px;border-left:1px solid var(--rule-strong);
 }
+.tr-row{display:flex;gap:10px;align-items:center;font-size:13px;white-space:nowrap;}
 .tr-br{
   font-family:"Zen Kaku Gothic New",sans-serif;font-size:11px;font-weight:700;
-  color:var(--ink-2);min-width:36px;flex:none;letter-spacing:.04em;position:relative;
+  color:var(--ink-2);min-width:34px;flex:none;letter-spacing:.04em;position:relative;
 }
 /* 分岐ラベルから階層線へ伸びる横棒 */
 .tr-br:not(:empty)::before{
-  content:"";position:absolute;left:-64px;top:.62em;width:20px;
-  border-top:1px dashed var(--rule-strong);
+  content:"";position:absolute;left:-22px;top:50%;width:18px;
+  border-top:1px solid var(--rule-strong);
 }
-.tr-none{background:none;}
+.tr-n{
+  font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-3);
+  min-width:34px;text-align:right;flex:none;
+}
+.tr-card{
+  display:inline-flex;align-items:center;gap:9px;
+  background:var(--paper);border:1px solid var(--rule);border-radius:8px;
+  padding:8px 13px;box-shadow:var(--shadow);
+}
+.tr-row-skip .tr-skip{padding:4px 0;}
 .tr-t{overflow:hidden;text-overflow:ellipsis;}
 .tr-k{
   font-size:10px;letter-spacing:.06em;font-weight:700;text-transform:uppercase;
@@ -750,61 +756,61 @@ footer{
   <h3>ステップの入れ子構造</h3>
   <div class="tree">
     <ul>
-      <li><div class="tr-row"><span class="tr-n">1</span><span class="tr-br"></span><span class="tr-k k-box">トリガー</span><span class="tr-t">HTTP Webhook（GET request）／実行はテストボタン</span></div></li>
-      <li><div class="tr-row"><span class="tr-n">2</span><span class="tr-br"></span><span class="tr-k k-lut">LUT</span><span class="tr-t">起点行を検索</span></div></li>
-      <li><div class="tr-row"><span class="tr-n">3</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">件数 = 0（起点行が無い）</span></div>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">1</span><span class="tr-card"><span class="tr-k k-box">トリガー</span><span class="tr-t">HTTP Webhook（GET request）／実行はテストボタン</span></span></div></li>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">2</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">起点行を検索</span></span></div></li>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">3</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">件数 = 0（起点行が無い）</span></span></div>
         <ul>
-          <li><div class="tr-row"><span class="tr-n">4</span><span class="tr-br">はい</span><span class="tr-k k-lut">LUT</span><span class="tr-t">起点行を追加</span></div></li>
-          <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">何もしない（起点行は登録済み）</span></div></li>
+          <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">4</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">起点行を追加</span></span></div></li>
+          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">何もしない（起点行は登録済み）</span></div></li>
         </ul>
       </li>
-      <li><div class="tr-row"><span class="tr-n">5</span><span class="tr-br"></span><span class="tr-k k-loop">REPEAT</span><span class="tr-t">条件を満たす間繰り返す</span></div>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">5</span><span class="tr-card"><span class="tr-k k-loop">REPEAT</span><span class="tr-t">条件を満たす間繰り返す</span></span></div>
         <ul>
-          <li><div class="tr-row"><span class="tr-n">6</span><span class="tr-br"></span><span class="tr-k k-lut">LUT</span><span class="tr-t">to_scan のフォルダを検索</span></div></li>
-          <li><div class="tr-row"><span class="tr-n">7</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">件数 &gt; 0</span></div>
+          <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">6</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">to_scan のフォルダを検索</span></span></div></li>
+          <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">7</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">件数 &gt; 0</span></span></div>
             <ul>
-              <li><div class="tr-row"><span class="tr-n">8</span><span class="tr-br">はい</span><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">フォルダ単位のループ</span></div>
+              <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">8</span><span class="tr-card"><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">フォルダ単位のループ</span></span></div>
                 <ul>
-                  <li><div class="tr-row"><span class="tr-n">9</span><span class="tr-br"></span><span class="tr-k k-box">Box</span><span class="tr-t">フォルダ内アイテムを一覧取得</span></div></li>
-                  <li><div class="tr-row"><span class="tr-n">10</span><span class="tr-br"></span><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">アイテム単位のループ</span></div>
+                  <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">9</span><span class="tr-card"><span class="tr-k k-box">Box</span><span class="tr-t">フォルダ内アイテムを一覧取得</span></span></div></li>
+                  <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">10</span><span class="tr-card"><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">アイテム単位のループ</span></span></div>
                     <ul>
-                      <li><div class="tr-row"><span class="tr-n">11</span><span class="tr-br"></span><span class="tr-k k-box">待機</span><span class="tr-t">1 秒（レート制限対策）</span></div></li>
-                      <li><div class="tr-row"><span class="tr-n">12</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">type = folder</span></div>
+                      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">11</span><span class="tr-card"><span class="tr-k k-box">待機</span><span class="tr-t">1 秒（レート制限対策）</span></span></div></li>
+                      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">12</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">type = folder</span></span></div>
                         <ul>
-                          <li><div class="tr-row"><span class="tr-n">13</span><span class="tr-br">はい</span><span class="tr-k k-lut">LUT</span><span class="tr-t">登録済みか確認</span></div></li>
-                          <li><div class="tr-row"><span class="tr-n">14</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">未登録</span></div>
+                          <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">13</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">登録済みか確認</span></span></div></li>
+                          <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">14</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">未登録</span></span></div>
                             <ul>
-                              <li><div class="tr-row"><span class="tr-n">15</span><span class="tr-br">はい</span><span class="tr-k k-forma">Forma</span><span class="tr-t">フォルダを作成</span></div></li>
-                              <li><div class="tr-row"><span class="tr-n">16</span><span class="tr-br"></span><span class="tr-k k-lut">LUT</span><span class="tr-t">to_scan で登録（キューに追加）</span></div></li>
-                              <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">何もしない（作成済み）</span></div></li>
+                              <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">15</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">フォルダを作成</span></span></div></li>
+                              <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">16</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">to_scan で登録（キューに追加）</span></span></div></li>
+                              <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">何もしない（作成済み）</span></div></li>
                             </ul>
                           </li>
-                          <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">ステップ 17 の判定へ</span></div></li>
+                          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">ステップ 17 の判定へ</span></div></li>
                         </ul>
                       </li>
-                      <li><div class="tr-row"><span class="tr-n">17</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">type = file</span></div>
+                      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">17</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">type = file</span></span></div>
                         <ul>
-                          <li><div class="tr-row"><span class="tr-n">18</span><span class="tr-br">はい</span><span class="tr-k k-lut">LUT</span><span class="tr-t">登録済みか確認</span></div></li>
-                          <li><div class="tr-row"><span class="tr-n">19</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">未登録</span></div>
+                          <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">18</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">登録済みか確認</span></span></div></li>
+                          <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">19</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">未登録</span></span></div>
                             <ul>
-                              <li><div class="tr-row"><span class="tr-n">20</span><span class="tr-br">はい</span><span class="tr-k k-box">Box</span><span class="tr-t">ファイル内容をダウンロード</span></div></li>
-                              <li><div class="tr-row"><span class="tr-n">21</span><span class="tr-br"></span><span class="tr-k k-forma">Forma</span><span class="tr-t">ファイルをアップロード</span></div></li>
-                              <li><div class="tr-row"><span class="tr-n">22</span><span class="tr-br"></span><span class="tr-k k-lut">LUT</span><span class="tr-t">done で登録</span></div></li>
-                              <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">何もしない（転送済み）</span></div></li>
+                              <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">20</span><span class="tr-card"><span class="tr-k k-box">Box</span><span class="tr-t">ファイル内容をダウンロード</span></span></div></li>
+                              <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">21</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">ファイルをアップロード</span></span></div></li>
+                              <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">22</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">done で登録</span></span></div></li>
+                              <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">何もしない（転送済み）</span></div></li>
                             </ul>
                           </li>
-                          <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">何もしない</span></div></li>
+                          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">何もしない</span></div></li>
                         </ul>
                       </li>
                     </ul>
                   </li>
-                  <li><div class="tr-row"><span class="tr-n">23</span><span class="tr-br"></span><span class="tr-k k-lut">LUT</span><span class="tr-t">このフォルダを done に更新</span></div></li>
+                  <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">23</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">このフォルダを done に更新</span></span></div></li>
                 </ul>
               </li>
-              <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">ループ終了（未走査フォルダなし）</span></div></li>
+              <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">ループ終了（未走査フォルダなし）</span></div></li>
             </ul>
           </li>
-          <li><div class="tr-row"><span class="tr-n">24</span><span class="tr-br"></span><span class="tr-k k-loop">WHILE</span><span class="tr-t">件数 &gt; 0 の間ループ継続</span></div></li>
+          <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">24</span><span class="tr-card"><span class="tr-k k-loop">WHILE</span><span class="tr-t">件数 &gt; 0 の間ループ継続</span></span></div></li>
         </ul>
       </li>
     </ul>
@@ -1507,84 +1513,84 @@ File/folder source
 
   <div class="tree">
     <ul>
-      <li><div class="tr-row"><span class="tr-n">1</span><span class="tr-br"></span><span class="tr-k k-box">トリガー</span><span class="tr-t">フォルダ内での新しいイベント</span></div></li>
-      <li><div class="tr-row"><span class="tr-n">2</span><span class="tr-br"></span><span class="tr-k k-lut">LUT</span><span class="tr-t">対応表を検索（box_id = 対象の ID）／全分岐で使用</span></div></li>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">1</span><span class="tr-card"><span class="tr-k k-box">トリガー</span><span class="tr-t">フォルダ内での新しいイベント</span></span></div></li>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">2</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">対応表を検索（box_id = 対象の ID）／全分岐で使用</span></span></div></li>
 
-      <li><div class="tr-row"><span class="tr-n">3</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">Event = FILE.UPLOADED</span></div>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">3</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">Event = FILE.UPLOADED</span></span></div>
         <ul>
-          <li><div class="tr-row"><span class="tr-n">4</span><span class="tr-br">はい</span><span class="tr-k k-if">IF</span><span class="tr-t">未登録 かつ 0 B でない　<span class="ph ph-done">フェーズ1</span></span></div>
+          <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">4</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">未登録 かつ 0 B でない　<span class="ph ph-done">フェーズ1</span></span></span></div>
             <ul>
-              <li><div class="tr-row"><span class="tr-n">5-12</span><span class="tr-br">はい</span><span class="tr-k k-forma">Forma</span><span class="tr-t">新規アップロード</span></div></li>
-              <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">ステップ 13 の判定へ</span></div></li>
+              <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">5-12</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">新規アップロード</span></span></div></li>
+              <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">ステップ 13 の判定へ</span></div></li>
             </ul>
           </li>
-          <li><div class="tr-row"><span class="tr-n">13</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">登録済み かつ 0 B でない　<span class="ph ph-done">フェーズ2</span></span></div>
+          <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">13</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">登録済み かつ 0 B でない　<span class="ph ph-done">フェーズ2</span></span></span></div>
             <ul>
-              <li><div class="tr-row"><span class="tr-n">14-20</span><span class="tr-br">はい</span><span class="tr-k k-forma">Forma</span><span class="tr-t">バージョン追加</span></div></li>
-              <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">何もしない（0 B ファイルなど）</span></div></li>
+              <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">14-20</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">バージョン追加</span></span></div></li>
+              <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">何もしない（0 B ファイルなど）</span></div></li>
             </ul>
           </li>
-          <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">ステップ 21 の ELSE IF へ</span></div></li>
+          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">ステップ 21 の ELSE IF へ</span></div></li>
         </ul>
       </li>
 
-      <li><div class="tr-row"><span class="tr-n">21</span><span class="tr-br"></span><span class="tr-k k-else">ELSE IF</span><span class="tr-t">Event = FOLDER.CREATED　<span class="ph ph-done">フェーズ3</span></span></div>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">21</span><span class="tr-card"><span class="tr-k k-else">ELSE IF</span><span class="tr-t">Event = FOLDER.CREATED　<span class="ph ph-done">フェーズ3</span></span></span></div>
         <ul>
-          <li><div class="tr-row"><span class="tr-n">22-29</span><span class="tr-br">はい</span><span class="tr-k k-forma">Forma</span><span class="tr-t">フォルダ作成</span></div></li>
-          <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">ステップ 30 の ELSE IF へ</span></div></li>
+          <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">22-29</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">フォルダ作成</span></span></div></li>
+          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">ステップ 30 の ELSE IF へ</span></div></li>
         </ul>
       </li>
 
-      <li><div class="tr-row"><span class="tr-n">30</span><span class="tr-br"></span><span class="tr-k k-else">ELSE IF</span><span class="tr-t">Event に RENAMED を含む　<span class="ph ph-done">フェーズ4</span></span></div>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">30</span><span class="tr-card"><span class="tr-k k-else">ELSE IF</span><span class="tr-t">Event に RENAMED を含む　<span class="ph ph-done">フェーズ4</span></span></span></div>
         <ul>
-          <li><div class="tr-row"><span class="tr-n">31</span><span class="tr-br">はい</span><span class="tr-k k-if">IF</span><span class="tr-t">登録済み</span></div>
+          <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">31</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">登録済み</span></span></div>
             <ul>
-              <li><div class="tr-row"><span class="tr-n">32</span><span class="tr-br">はい</span><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">対象の行</span></div>
+              <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">32</span><span class="tr-card"><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">対象の行</span></span></div>
                 <ul>
-                  <li><div class="tr-row"><span class="tr-n">33</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">type = folder</span></div>
+                  <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">33</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">type = folder</span></span></div>
                     <ul>
-                      <li><div class="tr-row"><span class="tr-n">34</span><span class="tr-br">はい</span><span class="tr-k k-forma">Forma</span><span class="tr-t">フォルダ名を変更</span></div></li>
-                      <li><div class="tr-row"><span class="tr-n">36-37</span><span class="tr-br">いいえ</span><span class="tr-k k-forma">Forma</span><span class="tr-t">最新バージョンID を取得 → ファイル名を変更</span></div></li>
+                      <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">34</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">フォルダ名を変更</span></span></div></li>
+                      <li><div class="tr-row"><span class="tr-br">いいえ</span><span class="tr-n">36-37</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">最新バージョンID を取得 → ファイル名を変更</span></span></div></li>
                     </ul>
                   </li>
-                  <li><div class="tr-row"><span class="tr-n">38</span><span class="tr-br"></span><span class="tr-k k-lut">LUT</span><span class="tr-t">last_name を更新</span></div></li>
+                  <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">38</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">last_name を更新</span></span></div></li>
                 </ul>
               </li>
-              <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">何もしない（未登録のためスキップ）</span></div></li>
             </ul>
           </li>
-          <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">ステップ 39 の ELSE IF へ</span></div></li>
+          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">何もしない（未登録のためスキップ）</span></div></li>
+          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">ステップ 39 の ELSE IF へ</span></div></li>
         </ul>
       </li>
 
-      <li><div class="tr-row"><span class="tr-n">39</span><span class="tr-br"></span><span class="tr-k k-else">ELSE IF</span><span class="tr-t">Event に MOVED を含む　<span class="ph ph-done">フェーズ5</span></span></div>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">39</span><span class="tr-card"><span class="tr-k k-else">ELSE IF</span><span class="tr-t">Event に MOVED を含む　<span class="ph ph-done">フェーズ5</span></span></span></div>
         <ul>
-          <li><div class="tr-row"><span class="tr-n">40</span><span class="tr-br">はい</span><span class="tr-k k-lut">LUT</span><span class="tr-t">移動先フォルダを検索</span></div></li>
-          <li><div class="tr-row"><span class="tr-n">41</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">対象・移動先とも登録済み</span></div>
+          <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">40</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">移動先フォルダを検索</span></span></div></li>
+          <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">41</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">対象・移動先とも登録済み</span></span></div>
             <ul>
-              <li><div class="tr-row"><span class="tr-n">42</span><span class="tr-br">はい</span><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">対象の行</span></div>
+              <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">42</span><span class="tr-card"><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">対象の行</span></span></div>
                 <ul>
-                  <li><div class="tr-row"><span class="tr-n">43</span><span class="tr-br"></span><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">移動先の行</span></div>
+                  <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">43</span><span class="tr-card"><span class="tr-k k-loop">FOR EACH</span><span class="tr-t">移動先の行</span></span></div>
                     <ul>
-                      <li><div class="tr-row"><span class="tr-n">44</span><span class="tr-br"></span><span class="tr-k k-if">IF</span><span class="tr-t">type = folder</span></div>
+                      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">44</span><span class="tr-card"><span class="tr-k k-if">IF</span><span class="tr-t">type = folder</span></span></div>
                         <ul>
-                          <li><div class="tr-row"><span class="tr-n">45</span><span class="tr-br">はい</span><span class="tr-k k-forma">Forma</span><span class="tr-t">フォルダを移動</span></div></li>
-                          <li><div class="tr-row"><span class="tr-n">47</span><span class="tr-br">いいえ</span><span class="tr-k k-forma">Forma</span><span class="tr-t">ファイルを移動</span></div></li>
+                          <li><div class="tr-row"><span class="tr-br">はい</span><span class="tr-n">45</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">フォルダを移動</span></span></div></li>
+                          <li><div class="tr-row"><span class="tr-br">いいえ</span><span class="tr-n">47</span><span class="tr-card"><span class="tr-k k-forma">Forma</span><span class="tr-t">ファイルを移動</span></span></div></li>
                         </ul>
                       </li>
-                      <li><div class="tr-row"><span class="tr-n">48</span><span class="tr-br"></span><span class="tr-k k-lut">LUT</span><span class="tr-t">forma_parent_id を更新</span></div></li>
+                      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">48</span><span class="tr-card"><span class="tr-k k-lut">LUT</span><span class="tr-t">forma_parent_id を更新</span></span></div></li>
                     </ul>
                   </li>
                 </ul>
               </li>
-              <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">何もしない（<a href="#sync:y6">検討事項①</a>）</span></div></li>
             </ul>
           </li>
-          <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br">いいえ</span><span class="tr-k tr-none"></span><span class="tr-skip">次の ELSE IF へ</span></div></li>
+          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">何もしない（<a href="#sync:y6">検討事項①</a>）</span></div></li>
+          <li><div class="tr-row tr-row-skip"><span class="tr-br">いいえ</span><span class="tr-n"></span><span class="tr-skip">次の ELSE IF へ</span></div></li>
         </ul>
       </li>
 
-      <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-br"></span><span class="tr-k k-else">ELSE IF</span><span class="tr-t">Event = *.TRASHED / *.RESTORED　<span class="ph ph-todo">フェーズ6</span></span></div></li>
+      <li><div class="tr-row"><span class="tr-br"></span><span class="tr-n">—</span><span class="tr-card"><span class="tr-k k-else">ELSE IF</span><span class="tr-t">Event = *.TRASHED / *.RESTORED　<span class="ph ph-todo">フェーズ6</span></span></span></div></li>
     </ul>
   </div>
 
