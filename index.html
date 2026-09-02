@@ -299,13 +299,13 @@ td code{font-size:12px;}
 .k-lut{background:var(--ok-soft);color:var(--ok);}
 .k-else{background:var(--warn-soft);color:var(--warn);}
 .tree ul.y::before,.tree ul.n::before{
-  display:inline-block;margin:2px 0 4px;
+  display:inline-block;margin:2px 0 3px;
   font-family:"Zen Kaku Gothic New",sans-serif;
-  font-size:10px;font-weight:700;letter-spacing:.08em;
-  padding:1px 9px;border-radius:99px;
+  font-size:11px;font-weight:700;letter-spacing:.08em;
+  color:var(--ink-3);
 }
-.tree ul.y::before{content:"はい";background:var(--ok-soft);color:var(--ok);}
-.tree ul.n::before{content:"いいえ";background:var(--danger-soft);color:var(--danger);}
+.tree ul.y::before{content:"└ はい";}
+.tree ul.n::before{content:"└ いいえ";}
 
 /* ---------- phase badges (Part 2) ---------- */
 .ph{font-size:10px;letter-spacing:.06em;font-weight:700;padding:2px 8px;border-radius:99px;font-family:"Zen Kaku Gothic New",sans-serif;white-space:nowrap;}
@@ -1560,7 +1560,7 @@ File/folder source
   <div class="note">
     <span class="h">図の読み方</span>
     <ul>
-      <li><span class="ph ph-done" style="background:var(--ok)">はい</span> の下が条件成立時に実行される範囲。<span class="ph" style="background:var(--danger);color:var(--paper)">いいえ</span> は ELSE ブロック</li>
+      <li><b>はい</b> の下が条件成立時に実行される範囲。<b>いいえ</b> は ELSE ブロック</li>
       <li>ラベルの無い入れ子はループの中身</li>
       <li><code>ELSE IF</code> の枝は上から順に評価され、<b>どれか 1 つだけ</b>が実行される</li>
     </ul>
