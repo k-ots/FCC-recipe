@@ -297,6 +297,15 @@ td code{font-size:12px;}
 .k-box{background:var(--surface-2);color:var(--ink-2);}
 .k-forma{background:var(--surface-2);color:var(--ink-2);}
 .k-lut{background:var(--ok-soft);color:var(--ok);}
+.k-else{background:var(--warn-soft);color:var(--warn);}
+.tree ul.y::before,.tree ul.n::before{
+  display:inline-block;margin:2px 0 4px;
+  font-family:"Zen Kaku Gothic New",sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.08em;
+  padding:1px 9px;border-radius:99px;
+}
+.tree ul.y::before{content:"はい";background:var(--ok-soft);color:var(--ok);}
+.tree ul.n::before{content:"いいえ";background:var(--danger-soft);color:var(--danger);}
 
 /* ---------- phase badges (Part 2) ---------- */
 .ph{font-size:10px;letter-spacing:.06em;font-weight:700;padding:2px 8px;border-radius:99px;font-family:"Zen Kaku Gothic New",sans-serif;white-space:nowrap;}
@@ -739,13 +748,13 @@ footer{
       <li><div class="tr-row"><span class="tr-n">1</span><span class="tr-k k-box">トリガー</span><span>HTTP Webhook（GET request）／実行はテストボタン</span></div></li>
       <li><div class="tr-row"><span class="tr-n">2</span><span class="tr-k k-lut">LUT</span><span>起点行を検索</span></div></li>
       <li><div class="tr-row"><span class="tr-n">3</span><span class="tr-k k-if">IF</span><span>件数 = 0（起点行が無い）</span></div>
-        <ul><li><div class="tr-row"><span class="tr-n">4</span><span class="tr-k k-lut">LUT</span><span>起点行を追加</span></div></li></ul>
+        <ul class="y"><li><div class="tr-row"><span class="tr-n">4</span><span class="tr-k k-lut">LUT</span><span>起点行を追加</span></div></li></ul>
       </li>
       <li><div class="tr-row"><span class="tr-n">5</span><span class="tr-k k-loop">REPEAT</span><span>条件を満たす間繰り返す</span></div>
         <ul>
           <li><div class="tr-row"><span class="tr-n">6</span><span class="tr-k k-lut">LUT</span><span>to_scan のフォルダを検索</span></div></li>
           <li><div class="tr-row"><span class="tr-n">7</span><span class="tr-k k-if">IF</span><span>件数 &gt; 0</span></div>
-            <ul>
+            <ul class="y">
               <li><div class="tr-row"><span class="tr-n">8</span><span class="tr-k k-loop">FOR EACH</span><span>フォルダ単位のループ</span></div>
                 <ul>
                   <li><div class="tr-row"><span class="tr-n">9</span><span class="tr-k k-box">Box</span><span>フォルダ内アイテムを一覧取得</span></div></li>
@@ -753,10 +762,10 @@ footer{
                     <ul>
                       <li><div class="tr-row"><span class="tr-n">11</span><span class="tr-k k-box">待機</span><span>1 秒（レート制限対策）</span></div></li>
                       <li><div class="tr-row"><span class="tr-n">12</span><span class="tr-k k-if">IF</span><span>type = folder</span></div>
-                        <ul>
+                        <ul class="y">
                           <li><div class="tr-row"><span class="tr-n">13</span><span class="tr-k k-lut">LUT</span><span>登録済みか確認</span></div></li>
                           <li><div class="tr-row"><span class="tr-n">14</span><span class="tr-k k-if">IF</span><span>未登録</span></div>
-                            <ul>
+                            <ul class="y">
                               <li><div class="tr-row"><span class="tr-n">15</span><span class="tr-k k-forma">Forma</span><span>フォルダを作成</span></div></li>
                               <li><div class="tr-row"><span class="tr-n">16</span><span class="tr-k k-lut">LUT</span><span>to_scan で登録（キューに追加）</span></div></li>
                             </ul>
@@ -764,10 +773,10 @@ footer{
                         </ul>
                       </li>
                       <li><div class="tr-row"><span class="tr-n">17</span><span class="tr-k k-if">IF</span><span>type = file</span></div>
-                        <ul>
+                        <ul class="y">
                           <li><div class="tr-row"><span class="tr-n">18</span><span class="tr-k k-lut">LUT</span><span>登録済みか確認</span></div></li>
                           <li><div class="tr-row"><span class="tr-n">19</span><span class="tr-k k-if">IF</span><span>未登録</span></div>
-                            <ul>
+                            <ul class="y">
                               <li><div class="tr-row"><span class="tr-n">20</span><span class="tr-k k-box">Box</span><span>ファイル内容をダウンロード</span></div></li>
                               <li><div class="tr-row"><span class="tr-n">21</span><span class="tr-k k-forma">Forma</span><span>ファイルをアップロード</span></div></li>
                               <li><div class="tr-row"><span class="tr-n">22</span><span class="tr-k k-lut">LUT</span><span>done で登録</span></div></li>
@@ -1487,26 +1496,73 @@ File/folder source
     <ul>
       <li><div class="tr-row"><span class="tr-n">1</span><span class="tr-k k-box">トリガー</span><span>フォルダ内での新しいイベント</span></div></li>
       <li><div class="tr-row"><span class="tr-n">2</span><span class="tr-k k-lut">LUT</span><span>対応表を検索（box_id = 対象の ID）／全分岐で使用</span></div></li>
+
       <li><div class="tr-row"><span class="tr-n">3</span><span class="tr-k k-if">IF</span><span>Event = FILE.UPLOADED</span></div>
-        <ul>
+        <ul class="y">
           <li><div class="tr-row"><span class="tr-n">4</span><span class="tr-k k-if">IF</span><span>未登録 かつ 0 B でない　<span class="ph ph-done">フェーズ1</span></span></div>
-            <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>新規アップロード（ステップ 5〜12）</span></div></li></ul>
+            <ul class="y"><li><div class="tr-row"><span class="tr-n">5-12</span><span class="tr-k k-forma">Forma</span><span>新規アップロード</span></div></li></ul>
           </li>
           <li><div class="tr-row"><span class="tr-n">13</span><span class="tr-k k-if">IF</span><span>登録済み かつ 0 B でない　<span class="ph ph-done">フェーズ2</span></span></div>
-            <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>バージョン追加（ステップ 14〜20）</span></div></li></ul>
+            <ul class="y"><li><div class="tr-row"><span class="tr-n">14-20</span><span class="tr-k k-forma">Forma</span><span>バージョン追加</span></div></li></ul>
           </li>
         </ul>
       </li>
-      <li><div class="tr-row"><span class="tr-n">21</span><span class="tr-k k-if">IF</span><span>Event = FOLDER.CREATED　<span class="ph ph-done">フェーズ3</span></span></div>
-        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>フォルダ作成（ステップ 22〜29）</span></div></li></ul>
+
+      <li><div class="tr-row"><span class="tr-n">21</span><span class="tr-k k-else">ELSE IF</span><span>Event = FOLDER.CREATED　<span class="ph ph-done">フェーズ3</span></span></div>
+        <ul class="y"><li><div class="tr-row"><span class="tr-n">22-29</span><span class="tr-k k-forma">Forma</span><span>フォルダ作成</span></div></li></ul>
       </li>
-      <li><div class="tr-row"><span class="tr-n">30</span><span class="tr-k k-if">IF</span><span>Event に RENAMED を含む　<span class="ph ph-done">フェーズ4</span></span></div>
-        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>リネーム（ステップ 31〜38）</span></div></li></ul>
+
+      <li><div class="tr-row"><span class="tr-n">30</span><span class="tr-k k-else">ELSE IF</span><span>Event に RENAMED を含む　<span class="ph ph-done">フェーズ4</span></span></div>
+        <ul class="y">
+          <li><div class="tr-row"><span class="tr-n">31</span><span class="tr-k k-if">IF</span><span>登録済み</span></div>
+            <ul class="y">
+              <li><div class="tr-row"><span class="tr-n">32</span><span class="tr-k k-loop">FOR EACH</span><span>対象の行</span></div>
+                <ul>
+                  <li><div class="tr-row"><span class="tr-n">33</span><span class="tr-k k-if">IF</span><span>type = folder</span></div>
+                    <ul class="y"><li><div class="tr-row"><span class="tr-n">34</span><span class="tr-k k-forma">Forma</span><span>フォルダ名を変更</span></div></li></ul>
+                    <ul class="n"><li><div class="tr-row"><span class="tr-n">36-37</span><span class="tr-k k-forma">Forma</span><span>最新バージョンID を取得 → ファイル名を変更</span></div></li></ul>
+                  </li>
+                  <li><div class="tr-row"><span class="tr-n">38</span><span class="tr-k k-lut">LUT</span><span>last_name を更新</span></div></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </li>
-      <li><div class="tr-row"><span class="tr-n">39</span><span class="tr-k k-if">IF</span><span>Event に MOVED を含む　<span class="ph ph-done">フェーズ5</span></span></div>
-        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>移動（ステップ 40〜48）</span></div></li></ul>
+
+      <li><div class="tr-row"><span class="tr-n">39</span><span class="tr-k k-else">ELSE IF</span><span>Event に MOVED を含む　<span class="ph ph-done">フェーズ5</span></span></div>
+        <ul class="y">
+          <li><div class="tr-row"><span class="tr-n">40</span><span class="tr-k k-lut">LUT</span><span>移動先フォルダを検索</span></div></li>
+          <li><div class="tr-row"><span class="tr-n">41</span><span class="tr-k k-if">IF</span><span>対象・移動先とも登録済み</span></div>
+            <ul class="y">
+              <li><div class="tr-row"><span class="tr-n">42</span><span class="tr-k k-loop">FOR EACH</span><span>対象の行</span></div>
+                <ul>
+                  <li><div class="tr-row"><span class="tr-n">43</span><span class="tr-k k-loop">FOR EACH</span><span>移動先の行</span></div>
+                    <ul>
+                      <li><div class="tr-row"><span class="tr-n">44</span><span class="tr-k k-if">IF</span><span>type = folder</span></div>
+                        <ul class="y"><li><div class="tr-row"><span class="tr-n">45</span><span class="tr-k k-forma">Forma</span><span>フォルダを移動</span></div></li></ul>
+                        <ul class="n"><li><div class="tr-row"><span class="tr-n">47</span><span class="tr-k k-forma">Forma</span><span>ファイルを移動</span></div></li></ul>
+                      </li>
+                      <li><div class="tr-row"><span class="tr-n">48</span><span class="tr-k k-lut">LUT</span><span>forma_parent_id を更新</span></div></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </li>
-      <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.TRASHED / *.RESTORED　<span class="ph ph-todo">フェーズ6</span></span></div></li>
+
+      <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-else">ELSE IF</span><span>Event = *.TRASHED / *.RESTORED　<span class="ph ph-todo">フェーズ6</span></span></div></li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <span class="h">図の読み方</span>
+    <ul>
+      <li><span class="ph ph-done" style="background:var(--ok)">はい</span> の下が条件成立時に実行される範囲。<span class="ph" style="background:var(--danger);color:var(--paper)">いいえ</span> は ELSE ブロック</li>
+      <li>ラベルの無い入れ子はループの中身</li>
+      <li><code>ELSE IF</code> の枝は上から順に評価され、<b>どれか 1 つだけ</b>が実行される</li>
     </ul>
   </div>
 
