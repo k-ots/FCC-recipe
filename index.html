@@ -268,7 +268,11 @@ td code{font-size:12px;}
 .note.danger{border-color:var(--danger);background:var(--danger-soft);}
 .note.ok{border-color:var(--ok);background:var(--ok-soft);}
 .note p:last-child{margin-bottom:0;}
-.note .h{font-weight:700;font-family:"Zen Kaku Gothic New",sans-serif;display:block;margin-bottom:4px;}
+.note .h{font-weight:700;font-family:"Zen Kaku Gothic New",sans-serif;display:block;margin-bottom:6px;}
+.note ul{margin:0;padding-left:1.2em;}
+.note li{margin-bottom:4px;}
+.note li:last-child{margin-bottom:0;}
+.note table{margin:8px 0;}
 
 /* ---------- structure diagram ---------- */
 .tree{
@@ -615,10 +619,10 @@ footer{
   <h2><span class="num">01</span>概要</h2>
 
   <h3>目的</h3>
-  <p>Box の同期対象フォルダ配下にあるフォルダ・ファイルを、<b>階層構造を保ったまま</b> Autodesk Forma Data Management へ一括複製する。あわせて、Box 側 ID と Forma 側 URN の<b>対応表を構築</b>する。</p>
+  <p>Box の同期対象フォルダ配下を<b>階層構造を保ったまま</b> Forma へ一括複製し、あわせて Box ID と Forma URN の<b>対応表を構築</b>する。</p>
 
   <h3>位置づけ</h3>
-  <p>本レシピは、Forma 利用開始時に既存データを移行する<b>初期移行用</b>のレシピである。以降の継続的な同期は、別途 Box のイベントトリガーを使った同期レシピが担う（<a href="#sync">Part 2</a>）。本レシピが構築する対応表は、その同期レシピがリネーム・移動・削除を処理するための基盤となる。</p>
+  <p><b>初期移行専用</b>のレシピ。以降の同期は継続同期レシピ（<a href="#sync">Part 2</a>）が担い、本レシピが作る対応表がその基盤になる。</p>
 
   <div class="tw"><table>
     <tr><th>観点</th><th>扱い</th></tr>
@@ -790,7 +794,7 @@ footer{
   </div>
 
   <h3>重複チェックによる再開可能性</h3>
-  <p>ステップ 13・18 で <code>box_id</code> が対応表に登録済みかを確認し、未登録の場合のみ作成・転送を行う。この構造により、レート制限などでジョブが中断しても、<b>対応表をリセットせずそのまま再実行すれば続きから再開</b>できる。</p>
+  <p>ステップ 13・18 で <code>box_id</code> の登録有無を確認し、未登録のときだけ作成・転送する。そのため中断しても<b>対応表をリセットせず再実行すれば続きから再開</b>できる。</p>
 
   <div class="note warn">
     <span class="h">再開時の例外</span>
@@ -807,7 +811,7 @@ footer{
     <span><code>等幅</code>　直接入力する固定値</span>
   </div>
 
-  <p>記載のない項目はすべて空欄。インデントは実際の入れ子の深さに対応する。<b>案件ごとに差し替えが必要な設定値は行を色付けし「要変更」を付している</b>（該当ステップは見出しに「要変更あり」を表示）。全 24 ステップ中 <b>10 ステップ・16 箇所</b>が対象。一覧は <a href="#mig:s8">08 テンプレートとしての流用</a> にまとめている。</p>
+  <p>記載のない項目は空欄。インデントは入れ子の深さに対応する。<b>案件ごとに差し替える設定値は色付きの「要変更」</b>で示す（全 24 ステップ中 10 ステップ・16 箇所。一覧は <a href="#mig:s8">08</a>）。</p>
 
   <div class="steps">
 
@@ -824,9 +828,12 @@ footer{
 
     <div class="note danger">
       <span class="h">Scheduler トリガーを使ってはならない</span>
-      <p>当初は <code>Scheduler</code>／5 分間隔で構築していたが、<b>実運用で破綻した</b>。本レシピは 1 ジョブが Box ツリー全体を歩くため、完了まで数分かかる。5 分間隔では<b>前のジョブが終わる前に次のジョブが起動</b>し、対応表がまだ埋まりきっていない状態で重複チェックを行うため、作成済みのフォルダを「未登録」と誤認して <code>409 ERR_CONFLICT</code> を多発させた。実測で <b>10 成功 / 23 失敗</b>、対応表には同一内容の重複行が発生している。</p>
-      <p style="margin-top:8px">Webhook トリガーであれば<b>リクエストが来ない限りジョブが起きない</b>ため、多重起動が構造的に発生しない。レシピを起動状態のまま放置しても安全である。</p>
-      <p style="margin-top:8px">実際の実行はテストボタンで行っており Webhook URL は使っていないが、それでも Scheduler に戻さないのは、誤って起動状態にしたときに上記の多重起動が再発するためである。なお <b>Webhook URL を知っている人は誰でもレシピを起動できる</b>ため、URL を公開の場所に記載しないこと。</p>
+      <ul>
+        <li>1 ジョブが Box ツリー全体を歩くため数分かかる。5 分間隔では<b>前のジョブの完了前に次が起動する</b></li>
+        <li>対応表が埋まる前に重複チェックが走り、作成済みフォルダを未登録と誤認 → <code>409 ERR_CONFLICT</code> が多発。実測 <b>10 成功 / 23 失敗</b>、重複行も発生</li>
+        <li>Webhook ならリクエストが来ない限りジョブが起きない。起動状態のまま放置しても安全</li>
+        <li>実行はテストボタン。<b>Webhook URL は公開の場所に書かない</b>（知っていれば誰でも起動できる）</li>
+      </ul>
     </div>
 
     <div class="step" data-d="1">
@@ -838,7 +845,7 @@ footer{
       </dl>
       <div class="note" style="margin:10px 0 0">
         <span class="h">複数取得を使う理由（検証済み）</span>
-        <p><code>box_id</code> は一意キーなので、一見すると単一取得の「エントリー検索」でも良さそうに見える。<b>しかし実際に検証したところ、単一取得は該当なしの場合にエラーでジョブが停止し</b>（<code>Unable to find an entry matching search parameters</code>）、それを抑制する「Ignore if not found」のような設定項目も存在しないことを確認済み。この用途では「見つからない」＝新規ファイル・フォルダの初回検出であり、<b>むしろ通常発生するケース</b>のため、単一取得は使えない。複数取得は該当なしのとき空リスト（<code>Entries: []</code>）を正常に返すため、意図的にこちらを採用している。</p>
+        <p><code>box_id</code> は一意キーなので単一取得でも良さそうに見えるが、<b>単一取得は該当なしでジョブが停止する</b>（<code>Unable to find an entry matching search parameters</code>／抑制設定なし・検証済み）。ここでは「見つからない」＝新規検出で<b>通常発生するケース</b>のため使えない。空リストを返す複数取得を意図的に採用している。</p>
       </div>
       </div>
     </div>
@@ -1056,16 +1063,17 @@ footer{
 
     <div class="note danger">
       <span class="h">forma_id は必ず <code>dm.lineage</code> 形式で保存する</span>
-      <p>Forma のファイルには <b>2 つの ID 形式</b>がある。両者は同じファイルを指すが、用途が異なる。</p>
-      <table style="margin:10px 0">
-        <tr><th>形式</th><th>意味</th><th>用途</th></tr>
-        <tr><td class="lit">urn:adsk.wipprod:fs.file:vf.<b>XXXX</b>?version=N</td><td>バージョン単位</td><td>特定の版を指す</td></tr>
-        <tr><td class="lit">urn:adsk.wipprod:dm.lineage:<b>XXXX</b></td><td>ファイル単位</td><td><b>対応表に保存するのはこちら</b></td></tr>
-      </table>
-      <p><b>バージョン形式を保存すると、継続同期レシピのフェーズ2（バージョン追加）が動作しない。</b><code>Upload document</code> の <code>File ID</code> 欄にバージョン形式を渡すと <code>400 BAD_INPUT: The object is not the correct type</code> で失敗する。</p>
-      <p style="margin-top:8px"><b>ステップ 21 の出力がどちらの形式を返すかは、環境や実行タイミングで揺れることが確認されている。</b>レシピデータのプレビューには <code>dm.lineage</code> 形式が表示されるにもかかわらず、実際に保存された値は全行バージョン形式だった、という事象が実機で発生した（原因未解明）。そのためステップ 22 では、<b>どちらの形式が来ても正しい値になる変換式</b>を使っている。</p>
-      <p style="margin-top:8px">この式は「<code>?</code> 以降を除去」→「<code>fs.file:vf.</code> を <code>dm.lineage:</code> に置換」を行う。すでに <code>dm.lineage</code> 形式であれば置換対象がなく素通りするため、二重に変換される心配はない。<b>両形式の <code>XXXX</code> 部分は完全に同一</b>であることを実データで確認済み。</p>
-      <p style="margin-top:8px"><b>Workato のフォーミュラ欄では、データピルを手打ちしてはならない。</b>必ずレシピデータパネルからドラッグする。手打ちすると「数式にエラーがあります」が消えない。ドラッグしたピルはチップとして描画されるので見分けられる。</p>
+      <div class="tw"><table>
+        <tr><th>形式</th><th>単位</th><th>用途</th></tr>
+        <tr><td class="lit">…fs.file:vf.<b>XXXX</b>?version=N</td><td>バージョン</td><td>特定の版を指す</td></tr>
+        <tr><td class="lit">…dm.lineage:<b>XXXX</b></td><td>ファイル</td><td><b>対応表に保存するのはこちら</b></td></tr>
+      </table></div>
+      <ul>
+        <li>バージョン形式を保存すると、フェーズ2 が <code>400 BAD_INPUT: The object is not the correct type</code> で失敗する</li>
+        <li>ステップ21 の出力形式は<b>安定しない</b>。プレビューは <code>dm.lineage</code> なのに保存値は全行バージョン形式、という事象が実機で発生（原因未解明）</li>
+        <li>そのためステップ22 は<b>どちらが来ても正しくなる変換式</b>を使う。<code>XXXX</code> 部分は両形式で同一（実データで確認済み）</li>
+        <li>フォーミュラ欄のデータピルは<b>必ずドラッグする</b>。手打ちすると「数式にエラーがあります」が消えない</li>
+      </ul>
     </div>
 
     <div class="divider">フォルダの走査完了</div>
@@ -1105,9 +1113,12 @@ footer{
 
   <div class="note danger">
     <span class="h">0 バイトのファイルはエラーになる</span>
-    <p>Box 上に 0 B のファイルが存在すると、そのファイルの処理時点で<b>ジョブが停止する</b>。</p>
-    <p style="margin-top:8px"><code>Missing required field: 'File content' must be present</code></p>
-    <p style="margin-top:8px">Box からのダウンロード自体は成功するが内容が空となり、Forma コネクタの <code>File content</code> が必須項目であるためリクエスト送信前にバリデーションで弾かれる。Autodesk の API には到達していない。<b>本レシピでは回避処理を実装していない</b>ため、移行前に Box 側で 0 B ファイルの有無を確認すること。</p>
+    <p><span class="fx">Missing required field: &#39;File content&#39; must be present</span></p>
+    <ul>
+      <li>ダウンロード自体は成功するが内容が空になる</li>
+      <li><code>File content</code> が必須のため、リクエスト送信前にバリデーションで弾かれる（Autodesk の API には到達しない）</li>
+      <li><b>回避処理は未実装</b>。移行前に Box 側で 0 B ファイルの有無を確認すること</li>
+    </ul>
   </div>
 
   <div class="tw"><table>
@@ -1277,7 +1288,7 @@ footer{
     </tr>
     <tr>
       <td class="nowrap"><b>タイムゾーン</b></td>
-      <td>Workato の <code>now</code> は<b>アカウント設定のタイムゾーン（既定では太平洋時間）</b>を返す。日本時間で記録するため、<code>last_synced_at</code> には必ず <span class="fx">now.in_time_zone("Asia/Tokyo")</span> を使う。ジョブ履歴の時刻表示も同じ設定に従うため、Box・Forma の画面（ブラウザのローカル時刻）と照合するときは時差に注意する</td>
+      <td>Workato の <code>now</code> は<b>アカウント設定のタイムゾーン（既定は太平洋時間）</b>を返すため、<code>last_synced_at</code> には必ず <span class="fx">now.in_time_zone("Asia/Tokyo")</span> を使う。ジョブ履歴の時刻も同設定に従うので、Box・Forma の画面と照合するときは時差に注意</td>
     </tr>
     <tr>
       <td class="nowrap"><b>Forma 側の既存データ</b></td>
@@ -1298,7 +1309,7 @@ footer{
     <p><b>同名ファイルのアップロードは自動でバージョン追加にならない。</b>Box でファイルが更新されて同期イベントが発生した際、単純にアップロードすると <code>409 ERR_CONFLICT</code> となる。継続同期レシピ（<a href="#sync">Part 2</a>）では対応表を引いて分岐させる必要がある。</p>
     <ul style="margin-top:8px;margin-bottom:0">
       <li><b>未登録</b> → 新規アップロード（本レシピと同じ処理）</li>
-      <li><b>登録済み</b> → 既存 item にバージョンを追加。<code>Upload document</code> の任意項目「File name」に対応表から引いた <code>forma_id</code> を渡す方式が使える可能性がある</li>
+      <li><b>登録済み</b> → <code>Upload document</code> の <code>File ID</code> に <code>forma_id</code> を渡してバージョン追加（<a href="#sync:y5">Part 2 / 05</a> で実装済み）</li>
     </ul>
   </div>
 </section>
@@ -1553,7 +1564,7 @@ File/folder source
       </dl>
       <div class="note" style="margin:10px 0 0">
         <span class="h">複数取得を使う理由（検証済み）</span>
-        <p><code>box_id</code> は一意キーだが、単一取得の「エントリー検索」は該当なしの場合にエラーでジョブが停止することを一括移行レシピの検証で確認済み（<code>Ignore if not found</code> のような抑制設定も無い）。この用途では「見つからない」＝新規ファイルの初回検出であり<b>むしろ通常発生するケース</b>のため、単一取得は使えない。空リストを正常に返す複数取得を意図的に使用している。</p>
+        <p>単一取得は該当なしでジョブが停止するため使えない（<a href="#mig:s5">移行レシピ ステップ2</a>で検証済み）。ここでは「見つからない」＝新規ファイルの初回検出で、通常発生するケースにあたる。</p>
       </div>
       </div>
     </div>
@@ -1585,7 +1596,7 @@ File/folder source
         <dt>目的</dt><dd>投入先フォルダの Forma URN を取得する</dd>
       </dl>
       <div class="note" style="margin:10px 0 0">
-        <p>複数取得を使う理由はステップ 2 と同じ（単一取得は該当なしでエラーになることを検証済みのため、意図的に複数取得を採用）。ここでは万一親フォルダが対応表に無かった場合でもエラーにならず空リストが返るため、ステップ 6 が 0 周で安全に終了できる。</p>
+        <p>複数取得を使う理由はステップ 2 と同じ。親フォルダが対応表に無くても空リストが返るため、ステップ 6 が 0 周で安全に終了する。</p>
       </div>
       </div>
     </div>
@@ -1615,14 +1626,14 @@ File/folder source
       </dl>
       <div class="note danger" style="margin:10px 0 0">
         <span class="h">この監視ブロックを追加した理由（実機検証済み）</span>
-        <p>フェーズ1 を実際にテストしたところ、<b>ファイルを 1 つアップロードしただけなのに、Upload object の最終呼び出し（項目登録）が <code>409 ERR_CONFLICT</code>（"The entity id already existed"）で失敗する現象が、テストモード・本稼働のどちらでも 100% 再現した。</b>ただしファイル自体は正しく Forma 側に作成されており、実害（欠損・重複）は無い。原因を切り分けるため、以下を確認・除外した。</p>
+        <p>ファイルを 1 つアップロードしただけで、<code>Upload object</code> の最終呼び出しが <code>409 ERR_CONFLICT</code>（"The entity id already existed"）で失敗する現象が、テストモード・本稼働とも <b>100% 再現</b>した。ファイル自体は正しく作成され、実害（欠損・重複）は無い。切り分けのため以下を確認・除外した。</p>
         <ul style="margin:8px 0 0">
           <li><b>ジョブ一覧のフィルタ表示の問題</b> … フィルタを全解除しても件数は変わらず、除外</li>
           <li><b>テスト実行と本稼働が同時にリスニングしていた</b> … 本稼働のみの状態で再試験しても同じ 409 が発生し、除外</li>
           <li><b>Box 側が同一アップロードに対し 2 回 API 呼び出しを行っている</b> … その場合は Box 側のイベントも 2 回発行され、ジョブが 2 件に分かれるはずだが、ジョブ履歴には常に 1 件しか記録されないため、除外</li>
         </ul>
-        <p style="margin-top:8px">唯一残った仮説は<b>「Workato の通信処理内部で、最初のリクエストの成功応答を受け取れず、自動的に同一リクエストを再送している」</b>というもの（Workato/Autodesk 側の内部実装に起因し、UI 上の情報だけでは確定できない）。デバッグタブのネットワークトレースにも、これを裏付ける・否定する決め手は見つからなかった。<b>根本原因は未解明のまま。</b>確定させるには Workato サポートへの問い合わせが必要（ジョブID 例：<code>j-AbPhMfpE-W8K8oH-CD</code>）。</p>
-        <p style="margin-top:8px"><b>【追記】</b>フェーズ3（<code>Create folder in a project</code>）でも、まったく同じ 409 の重複現象が確認された（<a href="#sync:y5">05 フェーズ3の構成</a>）。<code>Upload object</code> と <code>Create folder</code> は実装もコネクタも異なるアクションであり、<b>異なる 2 つのアクションで同じ現象が起きたことから、原因は特定のアクション内部の再送処理ではなく、トリガー／ジョブ実行の起点側にある可能性が高まった。</b>いずれにせよ、このエラー監視パターンは<b>継続同期レシピの全アクション（Upload・Create folder・今後実装する更新／リネーム／移動系のアクション）に共通で適用すべき</b>という結論に至っている。</p>
+        <p style="margin-top:8px">唯一残った仮説は<b>「Workato が成功応答を受け取れず、同一リクエストを再送している」</b>。ネットワークトレースにも決め手はなく、<b>根本原因は未解明</b>。確定には Workato サポートへの問い合わせが必要（ジョブID 例：<code>j-AbPhMfpE-W8K8oH-CD</code>）。</p>
+        <p style="margin-top:8px"><b>【追記】</b>フェーズ3（<code>Create folder</code>）でも同じ現象を確認（<a href="#sync:y5">05</a>）。<b>実装の異なる 2 アクションで同一現象が起きたため、原因はアクション個別ではなくトリガー／ジョブ起点側にある可能性が高い。</b>このエラー監視パターンは<b>継続同期レシピの全アクションに共通で適用する</b>。</p>
       </div>
       </div>
     </div>
@@ -1675,15 +1686,20 @@ File/folder source
 
   <div class="note danger">
     <span class="h">forma_id はバージョン形式で保存してはならない</span>
-    <p><code>Upload document</code> の出力 <code>Document ID</code> は、<code>urn:adsk.wipprod:fs.file:vf.XXXX?version=N</code>（バージョン単位）を返すことがある。この形式のまま保存すると、<b>フェーズ2（バージョン追加）が <code>400 BAD_INPUT: The object is not the correct type</code> で失敗する</b>。</p>
-    <p style="margin-top:8px">対応表に保存するのは <code>urn:adsk.wipprod:dm.lineage:XXXX</code>（ファイル単位）でなければならない。両形式の <code>XXXX</code> 部分は同一なので、変換式で確実に正しい形式へ揃えている。すでに <code>dm.lineage</code> 形式なら置換対象がなく素通りするため、どちらが来ても安全である。詳細は<a href="#mig:s5">移行レシピ ステップ 22 の注記</a>と同じ。</p>
+    <ul>
+      <li><code>Upload document</code> の <code>Document ID</code> はバージョン形式を返すことがある</li>
+      <li>そのまま保存するとフェーズ2 が <code>400 BAD_INPUT</code> で失敗する</li>
+      <li>変換式でどちらの形式でも <code>dm.lineage</code> に揃える。詳細は<a href="#mig:s5">移行レシピ ステップ22</a>の注記</li>
+    </ul>
   </div>
 
   <div class="note">
     <span class="h">sha1 は記録のみで、判定には使っていない</span>
-    <p><code>sha1</code> はファイル内容のハッシュで、中身が同じなら同じ値になる。<b>どのステップからも参照しておらず、分岐条件には使っていない。</b></p>
-    <p style="margin-top:8px">「sha1 が前回と同じならバージョンを追加しない」という実装も考えられるが、<b>採用しない</b>。Box は中身を変えずに再アップロードしても版数が上がる仕様であり、sha1 で差分判定すると <b>Box の版数と Forma の版数がずれる</b>。Box の履歴をそのまま再現するのが本レシピの目的なので、<code>FILE.UPLOADED</code> が来たら無条件にバージョンを追加するのが正しい。</p>
-    <p style="margin-top:8px">それでも記録しているのは、<b>障害調査と将来の突合バッチのため</b>。「Forma にある版が Box のどの内容に対応するか」を後から追える。記録コストはトリガー出力をそのまま入れるだけで、実質ゼロである。</p>
+    <ul>
+      <li>どのステップからも参照していない。分岐条件には使わない</li>
+      <li>「sha1 が同じなら版を作らない」は<b>採用しない</b>——Box は中身が同じでも版数が上がるため、Forma と版数がずれる</li>
+      <li>記録する理由は障害調査と将来の突合。コストはトリガー出力を入れるだけ</li>
+    </ul>
   </div>
 
   <h3>動作確認</h3>
@@ -1698,9 +1714,11 @@ File/folder source
 
   <div class="note warn">
     <span class="h">単一取得アクションに置き換えてはならない</span>
-    <p>ステップ 5・6 は「検索 → 繰り返し」の 2 ステップだが、<code>Lookup entry</code>（単一取得）に置き換えて 1 ステップにしたくなる。<b>これは実機で検証済みの誤りである。</b></p>
-    <p style="margin-top:8px">単一取得は該当なしのとき <code>Unable to find an entry matching search parameters</code> で<b>ジョブがエラー停止</b>する。しかも「見つからなければ無視する」ような抑制オプションは存在しない。「見つからない」が正常系となる用途では使えない。</p>
-    <p style="margin-top:8px">複数取得は該当なしのとき空リスト <code>Entries: []</code> を正常に返すため、<code>List size = 0</code> で判定でき、繰り返しも 0 回で安全に素通りする。<b>この 2 ステップ構成が正解</b>である。</p>
+    <ul>
+      <li>単一取得は該当なしのとき <code>Unable to find an entry matching search parameters</code> で<b>ジョブが停止する</b></li>
+      <li>抑制するオプションは存在しない。「見つからない」が正常系の用途では使えない</li>
+      <li>複数取得は空リスト <code>Entries: []</code> を返すため <code>List size = 0</code> で判定でき、繰り返しも 0 回で素通りする</li>
+    </ul>
   </div>
 
   <h3>フェーズ2 の構成</h3>
@@ -1795,9 +1813,12 @@ File/folder source
 
   <div class="note danger">
     <span class="h">二重実行が起きても 409 にならない</span>
-    <p>フェーズ1（新規アップロード）では、二重実行の 2 回目は<b>同名ファイルの衝突で 409</b> になり、エラー監視ブロックが吸収していた。</p>
-    <p style="margin-top:8px"><b>フェーズ2 では 409 が発生しない。</b>バージョン追加は何度実行しても成功するため、二重実行が起きると <b>V2 と V3 が連続で作られる</b>。エラーにならないので監視ブロックでは防げず、対応表を見ても気づけない。</p>
-    <p style="margin-top:8px">テスト時・本稼働時とも、<b>Forma のバージョン番号が 1 つだけ増えているか</b>を必ず確認すること。実測ではテストモード・本稼働モードのいずれでも二重実行は発生しなかった（V1→V2→V3）が、他フェーズでは二重実行が観測されているため、確認は省略しないこと。</p>
+    <ul>
+      <li>フェーズ1 は 2 回目が 409 になり、エラー監視ブロックが吸収する</li>
+      <li><b>フェーズ2 は 409 にならない</b>。バージョン追加は何度でも成功するため V2・V3 が連続で作られる</li>
+      <li>エラーが出ないので監視ブロックでは防げず、対応表を見ても気づけない</li>
+      <li>テスト時は<b>バージョンが 1 つだけ増えているか</b>を必ず確認する（実測では未発生）</li>
+    </ul>
   </div>
 
   <h3>フェーズ2 動作確認</h3>
@@ -1908,8 +1929,12 @@ File/folder source
   </div>
 
   <div class="note danger">
-    <span class="h">未検証：入れ子のフォルダ・ファイルを含むフォルダの一括アップロード</span>
-    <p>単体の空フォルダ作成では動作確認済み。しかし<b>「フォルダの中にサブフォルダがある」「フォルダの中にファイルがある」状態のフォルダを丸ごとアップロードした場合は未検証</b>。この場合、親フォルダの <code>FOLDER.CREATED</code> と、配下のサブフォルダ／ファイルのイベントが短時間で連続して発生する。もし親フォルダの対応表登録が完了する前に配下のイベントが処理されると、ステップ 5〜6（フェーズ1）・ステップ 23〜24（フェーズ3）の安全弁が働き、<b>配下のアイテムが対応表に見つからず、エラーにもならず静かにスキップされる</b>（同期漏れ）。詳細は <a href="#sync:y6">06 未確定事項</a>。</p>
+    <span class="h">入れ子フォルダの一括アップロード時の競合リスク</span>
+    <ul>
+      <li>親フォルダの登録完了前に配下のイベントが処理されると、安全弁が働いて<b>静かにスキップされる</b>（理論上）</li>
+      <li><b>本稼働モードの実測では発生しなかった</b>。入れ子のみ・フォルダ＋ファイル混在とも一致を確認</li>
+      <li>高負荷・多数同時投入では未検証。<a href="#sync:y6">06 未確定事項</a>参照</li>
+    </ul>
   </div>
 
   <h3>フェーズ3 動作確認</h3>
@@ -1925,9 +1950,13 @@ File/folder source
 
   <div class="note danger">
     <span class="h">Update object アクションは使えない</span>
-    <p>Forma コネクタには <code>Update object in a project</code> という、まさにリネーム用に見えるアクションがある。<b>しかしこれは動作しない。</b>Object が <code>Folder</code> でも <code>Document</code> でも、次の例外で失敗する。</p>
-    <p style="margin-top:8px"><span class="fx">Undefined method &#96;pluralize&#39; for nil:NilClass at line: 9232 / 9255</span></p>
-    <p style="margin-top:8px">Forma API が 4xx を返したのではなく、<b>コネクタ内部の Ruby コードで起きている例外</b>である。ピックリストで対象を選んでも ID を直接入力しても同じで、送信している値自体は正しい。実機で確認済み。<b>リネーム・移動は <code>Custom action</code> で API を直接呼ぶこと。</b></p>
+    <p><span class="fx">Undefined method &#96;pluralize&#39; for nil:NilClass at line: 9232 / 9255</span></p>
+    <ul>
+      <li>Object が <code>Folder</code> / <code>Document</code> のどちらでも失敗する</li>
+      <li>API の 4xx ではなく<b>コネクタ内部の例外</b>。送信している値自体は正しい</li>
+      <li>ピックリスト選択でも ID 直接入力でも同じ</li>
+      <li><b>リネーム・移動は <code>Custom action</code> で API を直接呼ぶこと</b></li>
+    </ul>
   </div>
 
   <div class="note ok">
@@ -2030,16 +2059,22 @@ File/folder source
 
   <div class="note danger">
     <span class="h">ファイル名の変更に PATCH items は使えない</span>
-    <p>直感的には <code>PATCH items</code> の <code>displayName</code> を変えれば済みそうだが、Autodesk のドキュメントに<b>「updating the displayName of an item is not supported for BIM 360 Docs or Forma items」</b>と明記されている。</p>
-    <p style="margin-top:8px">代わりに <b><code>PATCH versions</code> の <code>attributes.name</code></b> を使う。これなら<b>バージョンは増えない</b>（Forma の画面上でリネームしてもバージョンが増えないことと一致する）。ドキュメントが代替として案内している <code>POST versions</code> は新バージョンを作る方式で、そちらはバージョンが増えてしまう。</p>
-    <p style="margin-top:8px">ただし <code>PATCH versions</code> は<b>バージョン形式の ID</b>（<code>fs.file:vf.XXXX?version=N</code>）を要求する。対応表が持っているのは lineage 形式で、末尾の <code>N</code> が分からない。そのためステップ36 で最新バージョン ID を取得している。</p>
+    <ul>
+      <li>Autodesk 明記：<b>updating the displayName of an item is not supported for BIM 360 Docs or Forma items</b></li>
+      <li>代わりに <b><code>PATCH versions</code> の <code>attributes.name</code></b> を使う → <b>バージョンは増えない</b></li>
+      <li>ドキュメントが案内する <code>POST versions</code> は新バージョンを作る方式なので不採用</li>
+      <li><code>PATCH versions</code> はバージョン形式の ID を要求する。末尾の <code>N</code> が不明なため、ステップ36 で取得する</li>
+    </ul>
   </div>
 
   <div class="note warn">
     <span class="h">Path はエンコードあり、ボディはエンコードなし</span>
-    <p>バージョン ID には <code>?version=3</code> が含まれる。<b>これを URL のパスにそのまま入れるとクエリ文字列と解釈され、パスが切れてしまう</b>。そのためステップ37 の Path だけ <code>.encode_url</code> でエンコードする。</p>
-    <p style="margin-top:8px"><b>リクエストボディの <code>data.id</code> はエンコードしない。</b>同じ値だが用途が違うため、扱いが逆になる。ここは間違えやすい。</p>
-    <p style="margin-top:8px">あわせて、<b>フォーミュラモードでは全体が 1 つの式として評価される</b>ため、パスのリテラル部分は必ず引用符で囲み <code>+</code> で連結する。逆に<b>テキストモードでは <code>+</code> を書かない</b>——ピルを文字列の中にそのまま置く。<code>+</code> を残すとリテラルな文字として URL に混入し 404 になる。</p>
+    <ul>
+      <li>バージョン ID の <code>?version=3</code> をパスに直接入れるとクエリ文字列と解釈される → <b>Path だけ <code>.encode_url</code></b></li>
+      <li>ボディの <code>data.id</code> は<b>エンコードしない</b>。同じ値だが扱いが逆になる</li>
+      <li><b>フォーミュラモード</b>：全体が 1 つの式。リテラルは引用符で囲み <code>+</code> で連結する</li>
+      <li><b>テキストモード</b>：<code>+</code> を書かない。書くと URL に混入して 404 になる</li>
+    </ul>
   </div>
 
   <h3>フェーズ4 動作確認</h3>
@@ -2200,7 +2235,7 @@ File/folder source
     <tr>
       <td class="nowrap"></td>
       <td><b>入れ子のフォルダ・ファイルを含むフォルダを丸ごとアップロードしたときの同期漏れ</b><br><span class="ph ph-done">検証済み</span></td>
-      <td>理論上は、親フォルダの登録が完了する前に配下のイベントが処理されると安全弁（0周ループ）が働き、<b>配下のアイテムがエラーも出さず静かにスキップされる</b>。<b>本稼働モードでの実測では発生しなかった</b>（入れ子フォルダのみ・フォルダ＋ファイル混在のいずれも、対応表と Forma の両方で過不足なく一致）。ただし高負荷・多数同時投入の条件では未検証のため、リスクとしては残る</td>
+      <td>理論上は、親の登録完了前に配下のイベントが処理されると安全弁が働き<b>静かにスキップされる</b>。<b>本稼働モードの実測では発生せず</b>（入れ子のみ・混在とも一致を確認）。高負荷・多数同時投入は未検証</td>
       <td>運用開始後、大量アップロード時に対応表の件数と Box 側の件数を突き合わせる</td>
     </tr>
     <tr>
@@ -2218,61 +2253,73 @@ File/folder source
   </table></div>
 
   <h3>対応方針が未決の検討事項</h3>
-  <p>実装は進んでいるが、<b>運用に入る前に方針を決めておくべき事項</b>を整理する。いずれも「動かない」問題ではなく、「異常に気づけない」「乖離したときにどうするか」という性質の課題である。</p>
+  <p>動かない問題ではなく、<b>「異常に気づけない」「乖離したときどうするか」</b>という性質の課題。運用開始前に方針を決めること。</p>
+
+  <div class="tw"><table>
+    <tr><th>#</th><th>項目</th><th>現象・背景</th><th>対処案</th></tr>
+    <tr>
+      <td class="nowrap"><span class="ph ph-open">重要</span>①</td>
+      <td class="nowrap"><b>同期先が対応表にない</b><br><span class="empty">フェーズ1・3・5 共通</span></td>
+      <td>繰り返しが 0 回で終わり、<b>エラーも記録も残らない</b>。停止中の Box 変更、イベント取りこぼし、同期対象外への移動、フォルダ登録と配下イベントの競合で発生しうる</td>
+      <td>メール通知（<code>メール by Workato</code> が利用可）／エラー記録用テーブル</td>
+    </tr>
+    <tr>
+      <td class="nowrap">②</td>
+      <td class="nowrap"><b>同期対象外への移動</b></td>
+      <td>Forma 側をどうするかが未決。<code>path_collection</code> に同期ルートの ID が含まれるかで「対象内だが未登録」と判別できる</td>
+      <td>残す／削除する（フェーズ6 を流用）／通知のみ</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><span class="ph ph-open">重要</span>③</td>
+      <td class="nowrap"><b>取りこぼしの復旧手段</b></td>
+      <td>移行レシピは再実行しても<b>何も起きない</b>（<code>status = to_scan</code> の行だけを処理するため）。<code>type = folder</code> の <code>status</code> を <code>to_scan</code> に戻せば未登録分は埋まるが、<b>リネーム・移動のズレは直せない</b></td>
+      <td>突合レシピを別途作るかどうか</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><span class="ph ph-open">重要</span>④</td>
+      <td class="nowrap"><b>トリガー停止の検知</b></td>
+      <td>2026-09-02 に全イベントを検知しなくなる事象が発生。レシピは「アクティブ」表示のままでエラーも通知もなく、<b>同期が止まっても誰も気づけない</b>。復旧は Box コネクションの再接続</td>
+      <td>定期的な死活監視の要否</td>
+    </tr>
+    <tr>
+      <td class="nowrap">⑤</td>
+      <td class="nowrap"><b>ジョブ失敗の通知</b></td>
+      <td>ジョブ履歴を見に行かない限り気づけない</td>
+      <td>①④と同じ通知の仕組みでまとめて手当てできる</td>
+    </tr>
+    <tr>
+      <td class="nowrap">⑥</td>
+      <td class="nowrap"><b>0 バイトファイルの記録</b></td>
+      <td>ステップ4 の <code>Size &gt; 0</code> でスキップされるが、エラーにも記録にもならない</td>
+      <td><code>status = skipped_empty</code> で登録する処理を追加</td>
+    </tr>
+    <tr>
+      <td class="nowrap">⑦</td>
+      <td class="nowrap"><b>フェーズ2 の二重実行</b></td>
+      <td>バージョン追加は何度でも成功するため <b>409 にならず</b>、エラー監視でも対応表でも検知できない。実測では未発生</td>
+      <td>対策未実装。テスト時にバージョン増加数を目視確認</td>
+    </tr>
+    <tr>
+      <td class="nowrap">⑧</td>
+      <td class="nowrap"><b>Forma 側での直接変更</b></td>
+      <td>本レシピは<b>一方向同期</b>。Forma 側でリネーム・移動・削除すると対応表と実体が乖離する</td>
+      <td>運用ルールで「Forma 側は直接編集しない」ことを担保</td>
+    </tr>
+  </table></div>
 
   <div class="note danger">
-    <span class="h">① 同期先が対応表にないときの扱い（フェーズ1・3・5 共通）</span>
-    <p>親フォルダや移動先フォルダが対応表に登録されていない場合、<b>繰り返しが0回で終わり、エラーも記録も残さず静かに終了する</b>。安全弁として意図した挙動だが、同期漏れが発生していることに誰も気づけない。</p>
-    <p style="margin-top:8px"><b>発生しうる条件</b>：レシピ停止中に Box 側で作られたフォルダ、イベントの取りこぼし、同期対象フォルダの外への移動、フォルダ登録とその配下イベントの競合。</p>
-    <p style="margin-top:8px"><b>検討すべき対処</b>：メール通知（<code>メール by Workato</code> が利用可能、確認済み）、エラー記録用テーブルへの保存、Forma 側の扱い。<b>エラーを対応表そのものに記録するのは避けること</b>——重複チェックが <code>List size &gt; 0</code> で判定しているため、エラー行を混ぜると「登録済み」と誤認する。</p>
-  </div>
-
-  <div class="note warn">
-    <span class="h">② 同期対象外へ移動されたファイル・フォルダの扱い</span>
-    <p>監視フォルダの外へ移動された場合、Forma 側をどうするかが未決。<b>残す</b>（安全だが Box と乖離）、<b>削除する</b>（Box に追従。フェーズ6 の処理を流用）、<b>通知のみ</b>の3案がある。</p>
-    <p style="margin-top:8px">「対象内だが未登録」と「対象外へ移動」は、トリガー出力の <code>path_collection</code>（移動後の祖先フォルダ一覧）に同期ルートフォルダの ID が含まれるかどうかで判別できる。</p>
-  </div>
-
-  <div class="note warn">
-    <span class="h">③ 取りこぼしたイベントの復旧手段</span>
-    <p>一括移行レシピを再実行しても<b>そのままでは何も起きない</b>。ループが <code>status = to_scan</code> の行だけを処理する作りで、移行完了後は全行 <code>done</code> のためである。</p>
-    <p style="margin-top:8px">穴埋めに使うには、対応表の <code>type = folder</code> の行の <code>status</code> を一括で <code>to_scan</code> に戻してから実行する。重複チェックは <code>box_id</code> で行うため、<b>未登録のものだけが追加される</b>。</p>
-    <p style="margin-top:8px">ただしこれは<b>「足りないものを追加する」処理であって、「ズレを直す」処理ではない</b>。既存行の <code>forma_parent_id</code> や <code>last_name</code> は Box の現状と照合されないため、取りこぼしたリネーム・移動は復旧できない。Box の現状と対応表を突き合わせる<b>突合レシピを別途作るかどうか</b>が検討事項。</p>
-  </div>
-
-  <div class="note danger">
-    <span class="h">④ トリガーが停止したことを検知できない</span>
-    <p>2026-09-02 に、Box リアルタイムトリガーが<b>全イベントを検知しなくなる事象が実際に発生した</b>。レシピは「アクティブ」表示のままで、エラーも通知も出ない。</p>
-    <p style="margin-top:8px">レシピの停止/開始、トリガーの Folder 選び直し、最小構成の新規レシピでも改善せず、<b>Box コネクションを切断して再接続することで復旧</b>した。トリガーが無反応になったら、まずコネクションの再接続を疑うこと。</p>
-    <p style="margin-top:8px">この状態では<b>同期が完全に止まっているのに誰も気づけない</b>。定期的な死活監視（テスト用ファイルの投入と結果確認など）の要否が検討事項。</p>
-  </div>
-
-  <div class="note warn">
-    <span class="h">⑤ ジョブ失敗時に通知がない</span>
-    <p>ジョブが失敗しても、ジョブ履歴を見に行かない限り気づけない。①④と合わせて、<b>通知の仕組みを1つ用意すればまとめて手当てできる</b>。</p>
-  </div>
-
-  <div class="note">
-    <span class="h">⑥ 0 バイトファイルがスキップされた記録が残らない</span>
-    <p>ステップ4 の <code>Size &gt; 0</code> 条件でスキップされるが、エラーにも記録にもならない。必要であれば <code>status = skipped_empty</code> で対応表に登録する処理を追加する。</p>
-  </div>
-
-  <div class="note warn">
-    <span class="h">⑦ フェーズ2 の二重実行は検知できない</span>
-    <p>フェーズ1 では二重実行の2回目が <code>409</code> になりエラー監視ブロックが吸収するが、<b>バージョン追加は何度実行しても成功する</b>ため 409 が起きない。二重実行が発生すると余分なバージョンが静かに増え、対応表を見ても気づけない。</p>
-    <p style="margin-top:8px">テストモード・本稼働モードのいずれでも発生は確認されていないが、対策は入っていない。</p>
-  </div>
-
-  <div class="note">
-    <span class="h">⑧ Forma 側で直接変更された場合は同期されない</span>
-    <p>本レシピは Box → Forma の<b>一方向同期</b>である。Forma 側で直接リネーム・移動・削除を行うと対応表と実体が乖離し、以降の同期が意図しない結果になりうる。運用ルールで「Forma 側は直接編集しない」ことを担保する必要がある。</p>
+    <span class="h">①の実装時の注意</span>
+    <p><b>エラーを対応表そのものに記録しないこと。</b>重複チェックが <code>List size &gt; 0</code> で判定しているため、エラー行を混ぜると「登録済み」と誤認する。記録する場合は別テーブルを用意する。</p>
   </div>
 
   <h3>設計上の既知の課題</h3>
   <div class="note danger">
     <span class="h">同名ファイルのアップロードは自動でバージョン追加にならない</span>
-    <p>一括移行レシピ（<a href="#mig">Part 1</a>）の構築時に判明した制約。<code>Upload document</code> は同名ファイルが存在すると <code>409 ERR_CONFLICT</code> を返す。したがってファイル更新時は、フェーズ1（新規アップロード）とは<b>別の処理経路</b>が必要となる。これがフェーズ2 を分けている理由。</p>
-    <p style="margin-top:8px"><b>解決済み。</b><code>File ID</code> 欄を <code>Enter file ID</code> モードにして <code>dm.lineage</code> 形式の ID を渡すことで、バージョン追加として処理される。欄のヘルプにも「If versioning an existing file, provide file ID.」と明記されている。実装は<a href="#sync:y5">05 フェーズ2 の構成</a>を参照。</p>
+    <ul>
+      <li><code>Upload document</code> は同名ファイルが存在すると <code>409 ERR_CONFLICT</code> を返す</li>
+      <li>そのためファイル更新には別の処理経路が必要。これがフェーズ2 を分けている理由</li>
+      <li><b>解決済み</b>：<code>File ID</code> 欄を <code>Enter file ID</code> にして lineage 形式の ID を渡す（<a href="#sync:y5">05 フェーズ2 の構成</a>）</li>
+    </ul>
   </div>
 
   <div class="note warn">
