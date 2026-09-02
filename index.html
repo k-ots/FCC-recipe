@@ -550,10 +550,16 @@ footer{
       <td><a href="#sync:y5">ステップ 9, 17, 26</a></td>
     </tr>
     <tr>
+      <td class="nowrap">Forma Project ID<br><span class="empty">（Data Management 形式）</span></td>
+      <td class="lit">b.8a4fa86d-0a81-4cd1-9676-c9fe9f4b3d01</td>
+      <td class="empty">—</td>
+      <td><a href="#sync:y5">ステップ 34, 37, 45, 47</a>（Custom action の Path）</td>
+    </tr>
+    <tr>
       <td class="nowrap">対応表（Lookup table）名</td>
       <td class="lit">kondo_Box_Forma_Mapping</td>
       <td><a href="#mig:s5">ステップ 2, 4, 6, 13, 16, 18, 22, 23</a>（8 箇所）</td>
-      <td><a href="#sync:y5">ステップ 2, 5, 12, 20, 23, 29</a>（フェーズ1〜3 時点）</td>
+      <td><a href="#sync:y5">ステップ 2, 5, 12, 20, 23, 29, 38, 40, 48</a>（フェーズ1〜5 時点）</td>
     </tr>
   </table></div>
 
@@ -563,13 +569,14 @@ footer{
   </div>
 
   <div class="note warn">
-    <span class="h">継続同期レシピはフェーズ1〜3まで反映</span>
-    <p>継続同期レシピは<b>フェーズ1（新規ファイル）・フェーズ2（バージョン追加）・フェーズ3（フォルダ作成）</b>まで実装済み。フェーズ4（リネーム）以降を実装すると、対応表や Forma Account / Project name を参照するステップがさらに増える。実装が進み次第この一覧も更新すること。</p>
+    <span class="h">継続同期レシピはフェーズ1〜5まで反映</span>
+    <p>継続同期レシピは<b>フェーズ1〜5</b>まで実装済み。フェーズ6（削除・復元）を実装すると参照ステップがさらに増える。実装が進み次第この一覧も更新すること。</p>
+    <p style="margin-top:8px"><b>Custom action の Path には Project ID がベタ書きされている。</b>案件を差し替えるときに見落としやすいので注意すること。</p>
   </div>
 
   <h3>新しい案件での作業手順</h3>
   <ol>
-    <li>上表の 6 項目を、新しい案件の値に置き換えて手元に控える</li>
+    <li>上表の 7 項目を、新しい案件の値に置き換えて手元に控える</li>
     <li>両レシピを複製し、案件名が分かる名称に変更する</li>
     <li>その案件用の対応表を新規作成する</li>
     <li>上表の「使用箇所」列のステップを開き、値を 1 つずつ差し替える</li>
@@ -1310,7 +1317,7 @@ footer{
     <div class="part-meta">
       <span><b>トリガー</b>　リアルタイム（Webhook）</span>
       <span><b>対象イベント</b>　10 種</span>
-      <span><b>状態</b>　フェーズ1〜3 完了 / 4〜6 未着手</span>
+      <span><b>状態</b>　フェーズ1〜5 完了 / 6 未着手</span>
     </div>
   </div>
   <div class="index-grid">
@@ -1482,8 +1489,12 @@ File/folder source
       <li><div class="tr-row"><span class="tr-n">21</span><span class="tr-k k-if">IF</span><span>Event = FOLDER.CREATED　<span class="ph ph-done">フェーズ3</span></span></div>
         <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>フォルダ作成（ステップ 22〜29）</span></div></li></ul>
       </li>
-      <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.RENAMED　<span class="ph ph-todo">フェーズ4</span></span></div></li>
-      <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.MOVED　<span class="ph ph-todo">フェーズ5</span></span></div></li>
+      <li><div class="tr-row"><span class="tr-n">30</span><span class="tr-k k-if">IF</span><span>Event に RENAMED を含む　<span class="ph ph-done">フェーズ4</span></span></div>
+        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>リネーム（ステップ 31〜38）</span></div></li></ul>
+      </li>
+      <li><div class="tr-row"><span class="tr-n">39</span><span class="tr-k k-if">IF</span><span>Event に MOVED を含む　<span class="ph ph-done">フェーズ5</span></span></div>
+        <ul><li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-box">…</span><span>移動（ステップ 40〜48）</span></div></li></ul>
+      </li>
       <li><div class="tr-row"><span class="tr-n">—</span><span class="tr-k k-if">IF</span><span>Event = *.TRASHED / *.RESTORED　<span class="ph ph-todo">フェーズ6</span></span></div></li>
     </ul>
   </div>
@@ -1505,8 +1516,8 @@ File/folder source
     <tr><td class="nowrap">1</td><td class="nowrap">FILE.UPLOADED<br><span class="empty">新規のみ</span></td><td>未登録のファイルを新規アップロードし、対応表に登録する。移行レシピとほぼ同じ部品</td><td><span class="ph ph-done">完了</span></td></tr>
     <tr><td class="nowrap">2</td><td class="nowrap">FILE.UPLOADED<br><span class="empty">更新</span></td><td>登録済みファイルに新バージョンを追加する。<code>Upload document</code> の <code>File ID</code> 欄に lineage 形式の ID を渡す方式で実装（<a href="#sync:y5">05</a>）。テスト・本稼働の両モードで検証済み</td><td><span class="ph ph-done">完了</span></td></tr>
     <tr><td class="nowrap">3</td><td class="nowrap">FOLDER.CREATED</td><td>親を解決してフォルダを作成し、対応表に登録する。入れ子フォルダ・ファイルを含むフォルダの一括アップロードも本稼働モードで確認済み（<a href="#sync:y6">06</a>）</td><td><span class="ph ph-done">完了</span></td></tr>
-    <tr><td class="nowrap">4</td><td class="nowrap">*.RENAMED</td><td>Forma 側を改名する。フォルダから先に着手すると容易</td><td><span class="ph ph-todo">未着手</span></td></tr>
-    <tr><td class="nowrap">5</td><td class="nowrap">*.MOVED</td><td>Forma 側の親フォルダを変更する</td><td><span class="ph ph-todo">未着手</span></td></tr>
+    <tr><td class="nowrap">4</td><td class="nowrap">*.RENAMED</td><td>Forma 側を改名する。<code>Update object</code> アクションが動作しないため <code>Custom action</code> で API を直接呼ぶ（<a href="#sync:y5">05</a>）。バージョンは増えない</td><td><span class="ph ph-done">完了</span></td></tr>
+    <tr><td class="nowrap">5</td><td class="nowrap">*.MOVED</td><td>Forma 側の親フォルダを変更する。<code>Custom action</code> で <code>relationships.parent</code> を送る（<a href="#sync:y5">05</a>）</td><td><span class="ph ph-done">完了</span></td></tr>
     <tr><td class="nowrap">6</td><td class="nowrap">*.TRASHED<br>*.RESTORED</td><td>削除と復元。影響範囲が大きいため最後に実装する</td><td><span class="ph ph-todo">未着手</span></td></tr>
   </table></div>
 
@@ -1908,6 +1919,276 @@ File/folder source
     <li>Forma 側に同じ名前のフォルダが作成されているか確認する</li>
     <li>対応表に <code>type = folder</code> の行が 1 行増え、<code>status = done</code>、<code>last_synced_at</code> が <code>+09:00</code> になっているか確認する</li>
   </ol>
+
+  <h3>フェーズ4 の構成</h3>
+  <p><b>FILE.RENAMED / FOLDER.RENAMED（リネーム）</b>。ステップ21（<code>FOLDER.CREATED</code>）の「いいえ」の枝に ELSE IF として追加する。</p>
+
+  <div class="note danger">
+    <span class="h">Update object アクションは使えない</span>
+    <p>Forma コネクタには <code>Update object in a project</code> という、まさにリネーム用に見えるアクションがある。<b>しかしこれは動作しない。</b>Object が <code>Folder</code> でも <code>Document</code> でも、次の例外で失敗する。</p>
+    <p style="margin-top:8px"><span class="fx">Undefined method &#96;pluralize&#39; for nil:NilClass at line: 9232 / 9255</span></p>
+    <p style="margin-top:8px">Forma API が 4xx を返したのではなく、<b>コネクタ内部の Ruby コードで起きている例外</b>である。ピックリストで対象を選んでも ID を直接入力しても同じで、送信している値自体は正しい。実機で確認済み。<b>リネーム・移動は <code>Custom action</code> で API を直接呼ぶこと。</b></p>
+  </div>
+
+  <div class="note ok">
+    <span class="h">1 つの枝でファイルとフォルダの両方を受ける</span>
+    <p>ステップ30 の条件は「等しい」ではなく<b>「含む」</b>を使い、値を <code>RENAMED</code> とする。これで <code>FILE.RENAMED</code> と <code>FOLDER.RENAMED</code> の両方が同じ枝に入り、内部で <code>Type</code> により振り分けられる。両イベントとも実機で確認済み。</p>
+    <p style="margin-top:8px">トリガー出力の <code>Additional information &gt; Old name</code> に変更前の名前が入るが、<b>本レシピでは使わない</b>。対応表は <code>box_id</code> で引けるため、変更前の名前で照合する必要がないからである。</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step" data-d="1">
+      <div class="step-h"><span class="step-n">30</span><span class="step-t">ELSE IF 条件を設定する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>データフィールド</dt><dd><span class="pill">Event ステップ1</span></dd>
+        <dt>条件</dt><dd><b>含む</b></dd>
+        <dt>値</dt><dd><code>RENAMED</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="2">
+      <div class="step-h"><span class="step-n">31</span><span class="step-t">IF 条件を設定する</span><span class="step-app">ロジック</span><span class="step-br">30 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>データフィールド</dt><dd><span class="pill">List size ステップ2</span></dd>
+        <dt>条件</dt><dd>が0より大きい　<span class="empty">＝対応表に登録済み</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="3">
+      <div class="step-h"><span class="step-n">32</span><span class="step-t">各アイテムに対して繰り返す</span><span class="step-app">ロジック</span><span class="step-br">31 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>入力リスト</dt><dd><span class="pill">Entries ステップ2</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">33</span><span class="step-t">IF 条件を設定する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>データフィールド</dt><dd><span class="pill">File/folder source &gt; Type ステップ1</span></dd>
+        <dt>条件</dt><dd>に等しいなら</dd>
+        <dt>値</dt><dd><code>folder</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">34</span><span class="step-t">Custom action「Rename folder」</span><span class="step-app">Autodesk Forma</span><span class="step-br">33 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>Method</dt><dd><code>PATCH</code></dd>
+        <dt class="chg">Path</dt><dd class="chg"><b>テキストモード</b>　<code>/data/v1/projects/</code><b>b.8a4fa86d-0a81-4cd1-9676-c9fe9f4b3d01</b><code>/folders/</code><span class="pill">forma_id ステップ32</span><span class="chg-tag">要変更</span></dd>
+        <dt>Request headers</dt><dd><code>Content-Type</code> = <code>application/vnd.api+json</code></dd>
+        <dt>body → jsonapi.version</dt><dd><code>1.0</code></dd>
+        <dt>body → data.type</dt><dd><code>folders</code></dd>
+        <dt>body → data.id</dt><dd><span class="pill">forma_id ステップ32</span></dd>
+        <dt>body → data.attributes.name</dt><dd><span class="pill">File/folder source &gt; Name ステップ1</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">35</span><span class="step-t">ELSE</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>目的</dt><dd>ファイルの経路。<b>ELSE ブロックを使わずに並べると、フォルダのときも後続が実行されてしまう</b></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">36</span><span class="step-t">Get object in a project</span><span class="step-app">Autodesk Forma</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>Object</dt><dd><code>Document</code></dd>
+        <dt class="chg">Account name / Project name</dt><dd class="chg"><code>Build</code> / <code>202303_kondo_sample</code><span class="chg-tag">要変更</span></dd>
+        <dt>Folder ID</dt><dd><code>Enter folder ID</code> →　<span class="pill">forma_parent_id ステップ32</span></dd>
+        <dt>File name</dt><dd><code>Enter file ID</code> →　<span class="pill">forma_id ステップ32</span></dd>
+        <dt>目的</dt><dd>出力の <b><code>Relationships &gt; Tip &gt; Data &gt; ID</code></b> から<b>最新バージョンの ID</b> を得る</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">37</span><span class="step-t">Custom action「Rename file」</span><span class="step-app">Autodesk Forma</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>Method</dt><dd><code>PATCH</code></dd>
+        <dt class="chg">Path</dt><dd class="chg"><b>フォーミュラモード</b><br><span class="fx">"/data/v1/projects/b.8a4fa86d-0a81-4cd1-9676-c9fe9f4b3d01/versions/" + ID.encode_url</span><span class="chg-tag">要変更</span></dd>
+        <dt>Request headers</dt><dd><code>Content-Type</code> = <code>application/vnd.api+json</code></dd>
+        <dt>body → jsonapi.version</dt><dd><code>1.0</code></dd>
+        <dt>body → data.type</dt><dd><code>versions</code></dd>
+        <dt>body → data.id</dt><dd><span class="pill">Relationships &gt; Tip &gt; Data &gt; ID ステップ36</span>　<span class="empty">エンコードなし</span></dd>
+        <dt>body → data.attributes.name</dt><dd><span class="pill">File/folder source &gt; Name ステップ1</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">38</span><span class="step-t">エントリーを更新</span><span class="step-app">Lookup table</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt class="chg">Lookup table</dt><dd class="chg"><code>kondo_Box_Forma_Mapping</code><span class="chg-tag">要変更</span></dd>
+        <dt>Entry ID</dt><dd><span class="pill">Entry ID ステップ32</span></dd>
+        <dt>last_name</dt><dd><span class="pill">File/folder source &gt; Name ステップ1</span></dd>
+        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now.in_time_zone("Asia/Tokyo")</span></dd>
+        <dt>その他の列</dt><dd class="empty">すべて空欄</dd>
+      </dl></div>
+    </div>
+
+  </div>
+
+  <div class="note danger">
+    <span class="h">ファイル名の変更に PATCH items は使えない</span>
+    <p>直感的には <code>PATCH items</code> の <code>displayName</code> を変えれば済みそうだが、Autodesk のドキュメントに<b>「updating the displayName of an item is not supported for BIM 360 Docs or Forma items」</b>と明記されている。</p>
+    <p style="margin-top:8px">代わりに <b><code>PATCH versions</code> の <code>attributes.name</code></b> を使う。これなら<b>バージョンは増えない</b>（Forma の画面上でリネームしてもバージョンが増えないことと一致する）。ドキュメントが代替として案内している <code>POST versions</code> は新バージョンを作る方式で、そちらはバージョンが増えてしまう。</p>
+    <p style="margin-top:8px">ただし <code>PATCH versions</code> は<b>バージョン形式の ID</b>（<code>fs.file:vf.XXXX?version=N</code>）を要求する。対応表が持っているのは lineage 形式で、末尾の <code>N</code> が分からない。そのためステップ36 で最新バージョン ID を取得している。</p>
+  </div>
+
+  <div class="note warn">
+    <span class="h">Path はエンコードあり、ボディはエンコードなし</span>
+    <p>バージョン ID には <code>?version=3</code> が含まれる。<b>これを URL のパスにそのまま入れるとクエリ文字列と解釈され、パスが切れてしまう</b>。そのためステップ37 の Path だけ <code>.encode_url</code> でエンコードする。</p>
+    <p style="margin-top:8px"><b>リクエストボディの <code>data.id</code> はエンコードしない。</b>同じ値だが用途が違うため、扱いが逆になる。ここは間違えやすい。</p>
+    <p style="margin-top:8px">あわせて、<b>フォーミュラモードでは全体が 1 つの式として評価される</b>ため、パスのリテラル部分は必ず引用符で囲み <code>+</code> で連結する。逆に<b>テキストモードでは <code>+</code> を書かない</b>——ピルを文字列の中にそのまま置く。<code>+</code> を残すとリテラルな文字として URL に混入し 404 になる。</p>
+  </div>
+
+  <h3>フェーズ4 動作確認</h3>
+  <ol>
+    <li>Box でファイルを 1 つリネームする → Forma 側の名前が変わり、<b>バージョンが増えていない</b>ことを確認する</li>
+    <li>Box でフォルダを 1 つリネームする → Forma 側のフォルダ名が変わることを確認する</li>
+    <li>対応表の <code>last_name</code> と <code>last_synced_at</code> が両方の経路で更新されているか確認する</li>
+    <li><code>forma_id</code> が変化していないことを確認する</li>
+  </ol>
+
+  <div class="note ok">
+    <span class="h">配下への波及処理は不要</span>
+    <p>フォルダをリネームしても、そのフォルダの <code>forma_id</code> は変わらない。Forma のフォルダ ID は作成時に決まり、リネームでも移動でも変化しない。したがって<b>配下のファイルが持つ <code>forma_parent_id</code> は正しいまま</b>で、個別に更新する必要はない。</p>
+  </div>
+
+  <h3>フェーズ5 の構成</h3>
+  <p><b>FILE.MOVED / FOLDER.MOVED（移動）</b>。ステップ30（<code>RENAMED</code>）の「いいえ」の枝に ELSE IF として追加する。フェーズ4 と同じく「含む」で両イベントを 1 つの枝で受ける。</p>
+
+  <div class="note ok">
+    <span class="h">移動元・移動先はトリガー出力から取れる</span>
+    <p>長らく未検証だった <code>Additional information &gt; Before / After</code> の中身が確定した。<b>移動元・移動先の Box フォルダ ID</b> が入る。</p>
+    <p style="margin-top:8px">本レシピが使うのは <code>After &gt; ID</code>（移動先）のみ。これを <code>box_id</code> として対応表を引き、移動先フォルダの <code>forma_id</code> を得る。</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step" data-d="1">
+      <div class="step-h"><span class="step-n">39</span><span class="step-t">ELSE IF 条件を設定する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>データフィールド</dt><dd><span class="pill">Event ステップ1</span></dd>
+        <dt>条件</dt><dd><b>含む</b></dd>
+        <dt>値</dt><dd><code>MOVED</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="2">
+      <div class="step-h"><span class="step-n">40</span><span class="step-t">エントリーを検索</span><span class="step-app">Lookup table・複数取得</span><span class="step-br">39 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt class="chg">Lookup table</dt><dd class="chg"><code>kondo_Box_Forma_Mapping</code><span class="chg-tag">要変更</span></dd>
+        <dt>box_id</dt><dd><span class="pill">Additional information &gt; After &gt; ID ステップ1</span>　<span class="empty">移動先フォルダ</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="2">
+      <div class="step-h"><span class="step-n">41</span><span class="step-t">IF 条件を設定する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>条件1</dt><dd><span class="pill">List size ステップ2</span>　が <code>0</code> より大きい　<span class="empty">＝対象が登録済み</span></dd>
+        <dt>結合</dt><dd><code>かつ</code></dd>
+        <dt>条件2</dt><dd><span class="pill">List size ステップ40</span>　が <code>0</code> より大きい　<span class="empty">＝移動先が登録済み</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="3">
+      <div class="step-h"><span class="step-n">42</span><span class="step-t">各アイテムに対して繰り返す</span><span class="step-app">ロジック</span><span class="step-br">41 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>入力リスト</dt><dd><span class="pill">Entries ステップ2</span>　<span class="empty">移動する対象の行</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="4">
+      <div class="step-h"><span class="step-n">43</span><span class="step-t">各アイテムに対して繰り返す</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>入力リスト</dt><dd><span class="pill">Entries ステップ40</span>　<span class="empty">移動先フォルダの行。42 の入れ子</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">44</span><span class="step-t">IF 条件を設定する</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>データフィールド</dt><dd><span class="pill">File/folder source &gt; Type ステップ1</span></dd>
+        <dt>条件</dt><dd>に等しいなら</dd>
+        <dt>値</dt><dd><code>folder</code></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="6">
+      <div class="step-h"><span class="step-n">45</span><span class="step-t">Custom action「Move folder」</span><span class="step-app">Autodesk Forma</span><span class="step-br">44 → はい</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>Method</dt><dd><code>PATCH</code></dd>
+        <dt class="chg">Path</dt><dd class="chg"><b>テキストモード</b>　<code>/data/v1/projects/</code><b>b.8a4fa86d-…</b><code>/folders/</code><span class="pill">forma_id ステップ42</span><span class="chg-tag">要変更</span></dd>
+        <dt>Request headers</dt><dd><code>Content-Type</code> = <code>application/vnd.api+json</code></dd>
+        <dt>body → data.type</dt><dd><code>folders</code>　<span class="empty">移動する対象の種類</span></dd>
+        <dt>body → data.id</dt><dd><span class="pill">forma_id ステップ42</span></dd>
+        <dt>body → …parent.data.type</dt><dd><code>folders</code>　<span class="empty">移動先の種類</span></dd>
+        <dt>body → …parent.data.id</dt><dd><span class="pill">forma_id ステップ43</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">46</span><span class="step-t">ELSE</span><span class="step-app">ロジック</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>目的</dt><dd>ファイルの経路</dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="6">
+      <div class="step-h"><span class="step-n">47</span><span class="step-t">Custom action「Move file」</span><span class="step-app">Autodesk Forma</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt>Method</dt><dd><code>PATCH</code></dd>
+        <dt class="chg">Path</dt><dd class="chg"><b>テキストモード</b>　<code>/data/v1/projects/</code><b>b.8a4fa86d-…</b><code>/items/</code><span class="pill">forma_id ステップ42</span><span class="chg-tag">要変更</span></dd>
+        <dt>Request headers</dt><dd><code>Content-Type</code> = <code>application/vnd.api+json</code></dd>
+        <dt>body → data.type</dt><dd><code>items</code>　<span class="empty">ファイルなので items</span></dd>
+        <dt>body → data.id</dt><dd><span class="pill">forma_id ステップ42</span></dd>
+        <dt>body → …parent.data.type</dt><dd><code>folders</code>　<span class="empty">移動先はフォルダなので folders</span></dd>
+        <dt>body → …parent.data.id</dt><dd><span class="pill">forma_id ステップ43</span></dd>
+      </dl></div>
+    </div>
+
+    <div class="step" data-d="5">
+      <div class="step-h"><span class="step-n">48</span><span class="step-t">エントリーを更新</span><span class="step-app">Lookup table</span></div>
+      <div class="step-b"><dl class="kv">
+        <dt class="chg">Lookup table</dt><dd class="chg"><code>kondo_Box_Forma_Mapping</code><span class="chg-tag">要変更</span></dd>
+        <dt>Entry ID</dt><dd><span class="pill">Entry ID ステップ42</span></dd>
+        <dt>forma_parent_id</dt><dd><span class="pill">forma_id ステップ43</span>　<span class="empty">移動先</span></dd>
+        <dt>last_synced_at</dt><dd>フォーミュラ　<span class="fx">now.in_time_zone("Asia/Tokyo")</span></dd>
+        <dt>その他の列</dt><dd class="empty">すべて空欄</dd>
+      </dl></div>
+    </div>
+
+  </div>
+
+  <div class="note warn">
+    <span class="h">2 つの type を取り違えないこと</span>
+    <p>リクエストボディには <code>type</code> が 2 か所ある。意味が違うため、ファイルの移動では値が食い違う。</p>
+    <div class="tw"><table>
+      <tr><th>位置</th><th>意味</th><th>フォルダ移動</th><th>ファイル移動</th></tr>
+      <tr><td class="lit">data.type</td><td>移動する対象の種類</td><td class="lit">folders</td><td class="lit">items</td></tr>
+      <tr><td class="lit">…parent.data.type</td><td>移動先の種類</td><td class="lit">folders</td><td class="lit">folders</td></tr>
+    </table></div>
+    <p>移動先は常にフォルダなので、<b>下段は両方とも <code>folders</code></b> になる。</p>
+  </div>
+
+  <div class="note ok">
+    <span class="h">配下のファイルの行は更新不要</span>
+    <p>フォルダを移動しても、そのフォルダの <code>forma_id</code> は変わらない。対応表はパスではなく<b>親の ID</b> を保持しているため、配下のファイルの <code>forma_parent_id</code> は移動後も正しい。Forma 側でもフォルダごと移動するので中身は自動的に付いていく。リネームのときと同じ理由である。</p>
+  </div>
+
+  <div class="note danger">
+    <span class="h">移動先が対応表にないと静かにスキップされる</span>
+    <p>ステップ41 の条件により、<b>移動先フォルダが未登録の場合は何も実行されない</b>。エラーにも記録にもならない。対応方針は未決で、<a href="#sync:y6">06 未確定事項</a>の①②に整理してある。</p>
+  </div>
+
+  <h3>フェーズ5 動作確認</h3>
+  <ol>
+    <li>Box でファイルを 1 つ別フォルダへ移動する → Forma 側でも移動していることを確認する</li>
+    <li>Box でフォルダを 1 つ別フォルダへ移動する → Forma 側でも移動していることを確認する</li>
+    <li>対応表の <code>forma_parent_id</code> が移動先の ID に変わっているか確認する</li>
+    <li>移動したフォルダの配下のファイルについて、対応表が更新<b>されない</b>ことを確認する（これが正常）</li>
+  </ol>
 </section>
 
 <!-- ========== 06 ========== -->
@@ -1923,21 +2204,9 @@ File/folder source
       <td>運用開始後、大量アップロード時に対応表の件数と Box 側の件数を突き合わせる</td>
     </tr>
     <tr>
-      <td class="nowrap"><span class="ph ph-open">重要</span></td>
-      <td><code>Update object</code> でリネームができるか（ファイル・フォルダ）</td>
-      <td>フェーズ4 の実装方式。できない場合はファイルが <code>POST versions</code>、フォルダが <code>PATCH folders</code> のカスタムアクションになる</td>
-      <td>単発レシピで既存オブジェクトの名称変更を試す</td>
-    </tr>
-    <tr>
-      <td class="nowrap"></td>
-      <td><code>Additional information &gt; Before / After</code> の中身</td>
-      <td>フェーズ5（移動）。移動元・移動先のフォルダ ID であれば処理が素直に書ける</td>
-      <td>Box でファイルを別フォルダへ移動し、トリガー出力を確認する</td>
-    </tr>
-    <tr>
       <td class="nowrap"></td>
       <td>各イベントの <code>Event</code> 値の綴り</td>
-      <td>分岐条件。<code>FILE.UPLOADED</code> と <code>FOLDER.CREATED</code> のみ確認済み</td>
+      <td>分岐条件。<code>FILE.UPLOADED</code> / <code>FOLDER.CREATED</code> / <code>FILE.RENAMED</code> / <code>FOLDER.RENAMED</code> / <code>FILE.MOVED</code> / <code>FOLDER.MOVED</code> は確認済み。残るは <code>*.TRASHED</code> / <code>*.RESTORED</code></td>
       <td>実装するフェーズごとに、該当操作を Box で行って確認する</td>
     </tr>
     <tr>
@@ -1947,6 +2216,57 @@ File/folder source
       <td>運用開始後にジョブ履歴で確認する</td>
     </tr>
   </table></div>
+
+  <h3>対応方針が未決の検討事項</h3>
+  <p>実装は進んでいるが、<b>運用に入る前に方針を決めておくべき事項</b>を整理する。いずれも「動かない」問題ではなく、「異常に気づけない」「乖離したときにどうするか」という性質の課題である。</p>
+
+  <div class="note danger">
+    <span class="h">① 同期先が対応表にないときの扱い（フェーズ1・3・5 共通）</span>
+    <p>親フォルダや移動先フォルダが対応表に登録されていない場合、<b>繰り返しが0回で終わり、エラーも記録も残さず静かに終了する</b>。安全弁として意図した挙動だが、同期漏れが発生していることに誰も気づけない。</p>
+    <p style="margin-top:8px"><b>発生しうる条件</b>：レシピ停止中に Box 側で作られたフォルダ、イベントの取りこぼし、同期対象フォルダの外への移動、フォルダ登録とその配下イベントの競合。</p>
+    <p style="margin-top:8px"><b>検討すべき対処</b>：メール通知（<code>メール by Workato</code> が利用可能、確認済み）、エラー記録用テーブルへの保存、Forma 側の扱い。<b>エラーを対応表そのものに記録するのは避けること</b>——重複チェックが <code>List size &gt; 0</code> で判定しているため、エラー行を混ぜると「登録済み」と誤認する。</p>
+  </div>
+
+  <div class="note warn">
+    <span class="h">② 同期対象外へ移動されたファイル・フォルダの扱い</span>
+    <p>監視フォルダの外へ移動された場合、Forma 側をどうするかが未決。<b>残す</b>（安全だが Box と乖離）、<b>削除する</b>（Box に追従。フェーズ6 の処理を流用）、<b>通知のみ</b>の3案がある。</p>
+    <p style="margin-top:8px">「対象内だが未登録」と「対象外へ移動」は、トリガー出力の <code>path_collection</code>（移動後の祖先フォルダ一覧）に同期ルートフォルダの ID が含まれるかどうかで判別できる。</p>
+  </div>
+
+  <div class="note warn">
+    <span class="h">③ 取りこぼしたイベントの復旧手段</span>
+    <p>一括移行レシピを再実行しても<b>そのままでは何も起きない</b>。ループが <code>status = to_scan</code> の行だけを処理する作りで、移行完了後は全行 <code>done</code> のためである。</p>
+    <p style="margin-top:8px">穴埋めに使うには、対応表の <code>type = folder</code> の行の <code>status</code> を一括で <code>to_scan</code> に戻してから実行する。重複チェックは <code>box_id</code> で行うため、<b>未登録のものだけが追加される</b>。</p>
+    <p style="margin-top:8px">ただしこれは<b>「足りないものを追加する」処理であって、「ズレを直す」処理ではない</b>。既存行の <code>forma_parent_id</code> や <code>last_name</code> は Box の現状と照合されないため、取りこぼしたリネーム・移動は復旧できない。Box の現状と対応表を突き合わせる<b>突合レシピを別途作るかどうか</b>が検討事項。</p>
+  </div>
+
+  <div class="note danger">
+    <span class="h">④ トリガーが停止したことを検知できない</span>
+    <p>2026-09-02 に、Box リアルタイムトリガーが<b>全イベントを検知しなくなる事象が実際に発生した</b>。レシピは「アクティブ」表示のままで、エラーも通知も出ない。</p>
+    <p style="margin-top:8px">レシピの停止/開始、トリガーの Folder 選び直し、最小構成の新規レシピでも改善せず、<b>Box コネクションを切断して再接続することで復旧</b>した。トリガーが無反応になったら、まずコネクションの再接続を疑うこと。</p>
+    <p style="margin-top:8px">この状態では<b>同期が完全に止まっているのに誰も気づけない</b>。定期的な死活監視（テスト用ファイルの投入と結果確認など）の要否が検討事項。</p>
+  </div>
+
+  <div class="note warn">
+    <span class="h">⑤ ジョブ失敗時に通知がない</span>
+    <p>ジョブが失敗しても、ジョブ履歴を見に行かない限り気づけない。①④と合わせて、<b>通知の仕組みを1つ用意すればまとめて手当てできる</b>。</p>
+  </div>
+
+  <div class="note">
+    <span class="h">⑥ 0 バイトファイルがスキップされた記録が残らない</span>
+    <p>ステップ4 の <code>Size &gt; 0</code> 条件でスキップされるが、エラーにも記録にもならない。必要であれば <code>status = skipped_empty</code> で対応表に登録する処理を追加する。</p>
+  </div>
+
+  <div class="note warn">
+    <span class="h">⑦ フェーズ2 の二重実行は検知できない</span>
+    <p>フェーズ1 では二重実行の2回目が <code>409</code> になりエラー監視ブロックが吸収するが、<b>バージョン追加は何度実行しても成功する</b>ため 409 が起きない。二重実行が発生すると余分なバージョンが静かに増え、対応表を見ても気づけない。</p>
+    <p style="margin-top:8px">テストモード・本稼働モードのいずれでも発生は確認されていないが、対策は入っていない。</p>
+  </div>
+
+  <div class="note">
+    <span class="h">⑧ Forma 側で直接変更された場合は同期されない</span>
+    <p>本レシピは Box → Forma の<b>一方向同期</b>である。Forma 側で直接リネーム・移動・削除を行うと対応表と実体が乖離し、以降の同期が意図しない結果になりうる。運用ルールで「Forma 側は直接編集しない」ことを担保する必要がある。</p>
+  </div>
 
   <h3>設計上の既知の課題</h3>
   <div class="note danger">
